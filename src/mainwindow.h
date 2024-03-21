@@ -19,21 +19,13 @@ public:
 
 private:
     QStackedWidget *stackedWidget;
-    QComboBox *shapeComboBox;
-    QComboBox *shapeComboBox2;
-    QSpinBox *infillSpinBox;
-    QSpinBox *strandDistanceSpinBox;
-    QSpinBox *numMaterialsSpinBox;
     QPushButton *generateButton;
-    QLineEdit *sizeLineEdit;
-    QLineEdit *sizeLineEdit2;
-    QLabel *shapeLabel;
+
 
 private slots:
     void nextSection();
     void generateGCode();
     void previousSection();
-    void handleShapeSelection(int index);
 
 };
 
