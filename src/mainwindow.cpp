@@ -10,9 +10,17 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     // Crear un widget central para la ventana principal
-    QWidget *centralWidget = new QWidget(this);
-    centralWidget->setFixedSize(300,300);
+    centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
+
+    // Configurar la ventana principal como no redimensionable
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    setFixedSize(300, 300);  // Establecer el tamaño fijo
+
+    // Ocultar la esquina de redimensionamiento
+    QSizeGrip *sizeGrip = findChild<QSizeGrip*>();
+    if (sizeGrip)
+        sizeGrip->setVisible(false);
 
     // Crear un diseño de formulario para organizar los widgets
     QFormLayout *formLayout = new QFormLayout(centralWidget);
@@ -42,12 +50,10 @@ MainWindow::MainWindow(QWidget *parent)
 
    // Crear QStackedWidget para manejar las secciones
     stackedWidget = new QStackedWidget(this);
-    stackedWidget->setFixedSize(300,300);
     stackedWidget->addWidget(section1Widget);
     stackedWidget->addWidget(section2Widget);
     stackedWidget->addWidget(section3Widget);
     stackedWidget->addWidget(section4Widget);
-
 
 
     // Añadir QStackedWidget y los botones al formulario
@@ -56,28 +62,47 @@ MainWindow::MainWindow(QWidget *parent)
     formLayout->addRow(prevButton);
 
 
-
-
 }
 
+void MainWindow::adjustSectionSize(int sectionIndex) {
+    // Ajustar el tamaño de la ventana según la sección actual
+    switch (sectionIndex) {
+    case 0:
+        setFixedSize(300, 300);
+        break;
+    case 1:
+        setFixedSize(300, 300);
+        break;
+    case 2:
+        setFixedSize(300, 300);
+        break;
+    case 3:
+        setFixedSize(430, 500);
+        break;
+    default:
+        break;
+    }
+}
 
 
 void MainWindow::previousSection() {
     // Mostrar la sección anterior
     int prevIndex = stackedWidget->currentIndex() - 1;
     if (prevIndex >= 0) {
+        adjustSectionSize(prevIndex);
         stackedWidget->setCurrentIndex(prevIndex);
     }
 }
-
 
 void MainWindow::nextSection() {
     // Mostrar la siguiente sección
     int nextIndex = stackedWidget->currentIndex() + 1;
     if (nextIndex < stackedWidget->count()) {
+        adjustSectionSize(nextIndex);
         stackedWidget->setCurrentIndex(nextIndex);
     }
 }
+
 
 void MainWindow::generateGCode() {
     // Implementar la lógica para generar el GCode basado en la entrada del usuario

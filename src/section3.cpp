@@ -46,6 +46,9 @@ Section3::Section3(QWidget *parent) : QWidget(parent) {
     milimetros->setVisible(false);
     milimetros->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+    QDoubleValidator* Validator = new QDoubleValidator(this);
+    strandDistanceLineEdit->setValidator(Validator);
+
     // Layout horizontal
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
     QHBoxLayout *horizontalLayout2 = new QHBoxLayout;
