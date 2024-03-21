@@ -34,7 +34,7 @@ Section1::Section1(QWidget *parent) : QWidget(parent) {
 
 
     // Ajustar el tamaño mínimo de los spinboxes
-    plateXSpinBox->setMinimumWidth(200);  // Ajusta el valor según sea necesario
+    plateXSpinBox->setMinimumWidth(200);
     centerXSpinBox->setMinimumWidth(200);
 
     horizontalLayoutS1->addWidget(labelX);
@@ -44,13 +44,13 @@ Section1::Section1(QWidget *parent) : QWidget(parent) {
 
 
     // Ajustar el tamaño mínimo de los spinboxes
-    plateYSpinBox->setMinimumWidth(200);  // Ajusta el valor según sea necesario
+    plateYSpinBox->setMinimumWidth(200);
     centerYSpinBox->setMinimumWidth(200);
 
     horizontalLayout2S1->addWidget(labelY);
     horizontalLayout2S1->addWidget(plateYSpinBox);
 
-    // Agregar los diseños horizontales al diseño vertical principal
+    // Agregar los diseños horizontales
     section1Layout->addWidget(labelTitle);
     section1Layout->addLayout(horizontalLayoutS1);
     section1Layout->addLayout(horizontalLayout2S1);
@@ -62,7 +62,7 @@ Section1::Section1(QWidget *parent) : QWidget(parent) {
     labelCenterX->setVisible(false);
     labelCenterY->setVisible(false);
 
-    // Diseño horizontal para colocar las etiquetas y spinboxes del centro
+    // Diseño horizontal
     QHBoxLayout *horizontalLayoutCenterX = new QHBoxLayout;
 
     horizontalLayoutCenterX->addWidget(labelCenterX);
@@ -73,20 +73,20 @@ Section1::Section1(QWidget *parent) : QWidget(parent) {
     horizontalLayoutCenterY->addWidget(labelCenterY);
     horizontalLayoutCenterY->addWidget(centerYSpinBox);
 
-    // Botón para introducir manualmente el centro de la placa
+    // Botón para introducir manualmente el centro
     QPushButton *manualCenterButton = new QPushButton("Introducir Manualmente el centro", this);
 
-    // Conectar el botón con una función lambda que llama a showManualCenterInput
+    // Conectar el botón
     connect(manualCenterButton, &QPushButton::clicked, [=]() {
         showManualCenterInput(labelCenterX, labelCenterY);
     });
 
-    // Añadir los widgets al diseño vertical principal
+    // Añadir los widgets
     section1Layout->addWidget(manualCenterButton);
     section1Layout->addLayout(horizontalLayoutCenterX);
     section1Layout->addLayout(horizontalLayoutCenterY);
 
-    // Ajustar márgenes del diseño vertical principal
+
     section1Widget->setFixedSize(280,200);
 }
 

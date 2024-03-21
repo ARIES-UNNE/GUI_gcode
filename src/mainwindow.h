@@ -6,6 +6,7 @@
 #include <QStackedWidget>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QCoreApplication>
 #include <QPushButton>
 #include <QMessageBox>
 #include <qlabel.h>

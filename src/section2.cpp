@@ -29,7 +29,7 @@ Section2::Section2(QWidget *parent) : QWidget(parent) {
     section2Layout->setAlignment(Qt::AlignTop | Qt::AlignCenter);
     section2Widget->setLayout(section2Layout);
 
-    // Layout horizontal para los elementos debajo del QComboBox
+    // Layout horizontal
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
     QHBoxLayout *horizontalLayout2 = new QHBoxLayout;
 
@@ -58,7 +58,7 @@ Section2::Section2(QWidget *parent) : QWidget(parent) {
     QVBoxLayout *section2Layout2 = new QVBoxLayout(section2Widget);
     section2Layout2->addWidget(text7);
 
-    // Agregar el layout horizontal al layout vertical principal
+    // Agregar el layout horizontal
     section2Layout->addWidget(plateSizeLabel2);
     section2Layout->addLayout(horizontalLayout);
     section2Layout->addLayout(section2Layout2);
@@ -66,9 +66,9 @@ Section2::Section2(QWidget *parent) : QWidget(parent) {
 
     // Configurar el QLabel para que se expanda automáticamente
     shapeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    shapeLabel->setFixedWidth(60);  // Ajusta el ancho según sea necesario
+    shapeLabel->setFixedWidth(60);
 
-    // Conectar la señal de cambio de forma con la función handleShapeSelection
+    // Conectar la señal
     connect(shapeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Section2::handleShapeSelection);
     connect(shapeComboBox2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Section2::handleShapeSelection);
 
@@ -79,11 +79,10 @@ Section2::Section2(QWidget *parent) : QWidget(parent) {
 
 
 void Section2::handleShapeSelection(int index) {
-    // Mostrar el QLineEdit si la forma seleccionada es "Square" o "Circle"
+    // seleccionada es "Square" o "Circle"
     bool showSizeLineEdit = (shapeComboBox->currentText() == "Square" || shapeComboBox->currentText() == "Circle");
     sizeLineEdit->setVisible(showSizeLineEdit);
 
-    // Actualizar el texto del QLabel según la forma seleccionada
     QString labelText = (shapeComboBox->currentText() == "Square") ? "Lado:" : "Diámetro:";
     shapeLabel->setText(labelText);
     shapeLabel->setVisible(showSizeLineEdit);

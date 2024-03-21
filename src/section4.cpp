@@ -10,27 +10,27 @@ Section4::Section4(QWidget *parent) : QWidget(parent) {
     // Sección 4: Número de materiales
     QWidget *section4Widget = new QWidget(this);
     numMaterialsSpinBox = new QSpinBox(this);
-    numMaterialsSpinBox->setRange(0, 100);  // Establecer el rango de valores
+    numMaterialsSpinBox->setRange(0, 100);
 
     QLabel *plateSizeLabel4 = new QLabel("Materials", this);
 
-    // Crear un diseño vertical para organizar los widgets
+    // Crear un diseño vertical
     QVBoxLayout *section4Layout = new QVBoxLayout(section4Widget);
     section4Layout->setAlignment(Qt::AlignTop);
     section4Widget->setLayout(section4Layout);
 
-    // Conectar la señal valueChanged del QSpinBox a una función para manejar cambios en el número de materiales
+
     connect(numMaterialsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &Section4::updateMaterialNames);
 
-    // Agregar el widget principal al diseño vertical
+
     section4Layout->addWidget(plateSizeLabel4);
     section4Layout->addWidget(numMaterialsSpinBox);
 
-    // Crear un contenedor para los nombres de los materiales y colocarlo dentro de un QScrollArea
+
     materialNamesContainer = new QWidget(this);
     materialNamesLayout = new QVBoxLayout(materialNamesContainer);
 
-    // Configura el tamaño del contenido para que se ajuste al ancho del QScrollArea
+    // Configura el tamaño
     materialNamesContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 
     // Crear un contenedor para el encabezado
@@ -62,10 +62,10 @@ Section4::Section4(QWidget *parent) : QWidget(parent) {
 }
 
 void Section4::updateMaterialConfigs() {
-    // Limpiar la lista de configuraciones de materiales
+    // Limpiar la lista
     materialConfigs.clear();
 
-    // Recorrer todos los widgets de nombres de materiales y actualizar la lista de configuraciones de materiales
+
     for (int i = 0; i < materialNamesLayout->count(); ++i) {
         QWidget *materialRowWidget = materialNamesLayout->itemAt(i)->widget();
         if (materialRowWidget) {
@@ -88,16 +88,17 @@ void Section4::updateMaterialConfigs() {
 }
 
 void Section4::updateMaterialNames(int numMaterials) {
-    // Limpiar cualquier widget anterior en el contenedor
+    // Limpiar
     QLayoutItem *child;
     while ((child = materialNamesLayout->takeAt(0)) != nullptr) {
         delete child->widget();
         delete child;
     }
 
-    // Agregar nuevos widgets para los nombres de los materiales según el número seleccionado
+    // Agregar nuevos widgets
     for (int i = 1; i <= numMaterials; ++i) {
-        // Crear widgets para cada columna (Material, Nozzle, Filament)
+
+        // Crear widgets para cada columna
         QWidget *materialRow = new QWidget(this);
         QHBoxLayout *materialRowLayout = new QHBoxLayout(materialRow);
 
@@ -109,7 +110,7 @@ void Section4::updateMaterialNames(int numMaterials) {
         QLineEdit *filamentLineEdit = new QLineEdit(this);
         filamentLineEdit->setValidator(new QDoubleValidator(this));
 
-        // Ajustar el tamaño mínimo y máximo de cada columna
+        // tamaño mínimo y máximo
         materialLabel->setMinimumWidth(70);
         materialLabel->setMaximumWidth(70);
         nozzleComboBox->setMinimumWidth(70);
@@ -117,14 +118,14 @@ void Section4::updateMaterialNames(int numMaterials) {
         filamentLineEdit->setMinimumWidth(70);
         filamentLineEdit->setMaximumWidth(70);
 
-        // Agregar widgets al diseño de cada fila
+
         materialRowLayout->addWidget(materialLabel);
         materialRowLayout->addWidget(nozzleComboBox);
         materialRowLayout->addWidget(filamentLineEdit);
 
         materialNamesLayout->addWidget(materialRow);
 
-        // Conectar las señales de edición de los widgets a la función de actualización de configuraciones de materiales
+        // Conectar las señales
         connect(nozzleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Section4::updateMaterialConfigs);
         connect(filamentLineEdit, &QLineEdit::textChanged, this, &Section4::updateMaterialConfigs);
     }
@@ -132,12 +133,12 @@ void Section4::updateMaterialNames(int numMaterials) {
     // Asegurar que el contenedor se redibuje
     materialNamesContainer->update();
 
-    // Actualizar las configuraciones de materiales una vez se han creado los nuevos widgets
+
     updateMaterialConfigs();
 }
 
 
-// Función para obtener la lista de configuraciones de materiales
+
 QList<MaterialConfig> Section4::getMaterialConfigs() const {
     return materialConfigs;
 }

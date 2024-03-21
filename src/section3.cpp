@@ -10,17 +10,17 @@ Section3::Section3(QWidget *parent) : QWidget(parent) {
     // Sección 3: Infill o Strand Distance
     QWidget *section3Widget = new QWidget(this);
 
-    // Crear widgets para Infill y Strand Distance
+    // Crear widgets
     infillSpinBox = new QSpinBox(this);
     infillSpinBox->setRange(0, 100);
 
     strandDistanceLineEdit = new QLineEdit(this);
 
-    // Inicialmente, ocultar ambos widgets
+    // ocultar ambos widgets
     infillSpinBox->setVisible(false);
     strandDistanceLineEdit->setVisible(false);
 
-    // Crear un diseño vertical para organizar los widgets
+    // Crear un diseño vertical
     QVBoxLayout *section3Layout = new QVBoxLayout(section3Widget);
     section3Layout->setAlignment(Qt::AlignTop | Qt::AlignCenter);
     section3Widget->setLayout(section3Layout);
@@ -36,12 +36,12 @@ Section3::Section3(QWidget *parent) : QWidget(parent) {
     strandDistanceLineEdit->setMinimumWidth(200);
     strandDistanceLineEdit->setMaximumWidth(200);
 
-    // Etiqueta para el título
+
     QLabel *title = new QLabel("Selección de método", this);
     porcentaje = new QLabel("%: ", this);
     milimetros = new QLabel("mm: ", this);
 
-    // Inicialmente, ocultar ambos widgets
+    // ocultar ambos widgets
     porcentaje->setVisible(false);
     milimetros->setVisible(false);
     milimetros->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -63,13 +63,13 @@ Section3::Section3(QWidget *parent) : QWidget(parent) {
     horizontalLayout->setAlignment(Qt::AlignCenter);
     horizontalLayout2->setAlignment(Qt::AlignCenter);
 
-    // Agregar los widgets al diseño vertical principal
+
     section3Layout->addWidget(title);
     section3Layout->addWidget(shapeComboBox);
     section3Layout->addLayout(horizontalLayout);
     section3Layout->addLayout(horizontalLayout2);
 
-    // Conectar la señal currentIndexChanged a la función correspondiente
+    // Conectar la señal
     connect(shapeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Section3::handleMethodSelection);
 
     section3Widget->setFixedSize(280, 200);

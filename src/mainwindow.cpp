@@ -3,6 +3,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QDir>
+#include <QProcess>
 #include <QDebug>
 #include <QFileDialog>
 #include "section0.h"
@@ -26,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     if (sizeGrip)
         sizeGrip->setVisible(false);
 
-    // Crear un diseño de formulario para organizar los widgets
     QFormLayout *formLayout = new QFormLayout(centralWidget);
 
     // Sección 1: Tamaño de la placa
@@ -56,56 +56,57 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     stackedWidget->addWidget(section4Widget);
     stackedWidget->addWidget(section5Widget);
 
-    // Añadir QStackedWidget al formulario
+
     formLayout->addWidget(stackedWidget);
 
-    // Crear y configurar el layout horizontal para los botones
+    // Crear el layout horizontal para los botones
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
 
-    // Crear y configurar el botón para pasar a la siguiente sección
+    // Crear el botón para pasar a la siguiente sección
     QPushButton *nextButton = new QPushButton("Next", this);
     connect(nextButton, &QPushButton::clicked, this, &MainWindow::nextSection);
     buttonsLayout->addWidget(nextButton);
 
+    // Crear el botón para pasar a la siguiente sección
     QPushButton *prevButton = new QPushButton("Previous", this);
     connect(prevButton, &QPushButton::clicked, this, &MainWindow::previousSection);
     buttonsLayout->addWidget(prevButton);
 
-    // Crear y configurar el botón para mostrar los valores de las Secciones
+    // Crear el botón para mostrar los valores de las Secciones
     showValuesButton = new QPushButton("Show Section Values", this);
     connect(showValuesButton, &QPushButton::clicked, this, [section1Widget, section2Widget, section3Widget, section4Widget, this]() {
         showSectionValues(section1Widget, section2Widget,section3Widget, section4Widget);
     });
     showValuesButton->setVisible(false);
 
-    // Añadir el botón al formulario
     formLayout->addWidget(showValuesButton);
 
-    // Crear y configurar el botón para cancelar
+    // Crear el botón para cancelar
     QPushButton *cancelButton = new QPushButton("Cancel", this);
     connect(cancelButton, &QPushButton::clicked, this, &MainWindow::cancelConfirmation);
     buttonsLayout->addWidget(cancelButton);
 
-    // Establecer el tamaño fijo de los botones
+    // Tamaño fijo botones
     prevButton->setFixedSize(80, 30);
     nextButton->setFixedSize(80, 30);
     cancelButton->setFixedSize(80, 30);
     buttonsLayout->setAlignment(cancelButton, Qt::AlignRight);
 
 
-    // Añadir el layout de botones al formulario
+
     formLayout->addRow(buttonsLayout);
 
-    // Aplicar estilos a los botones y widgets
+    //  estilo
     applyStyles();
 
 }
 
+// No mirar todavía
 void MainWindow::applyStyles() {
-    // Estilo general de la ventana
+
     setStyleSheet("MainWindow { background-color: #f0f0f0; }");
 
-    // Estilo de los botones
+
     QString buttonStyle = "QPushButton { background-color: #4CAF50; color: white; border: none;"
                           "border-radius: 5px; padding: 10px 24px; font-size: 14px; }"
                           "QPushButton:hover { background-color: #45a049; }";
@@ -146,12 +147,11 @@ void MainWindow::adjustSectionSize(int sectionIndex) {
 }
 
 void MainWindow::cancelConfirmation() {
-    // Mostrar una ventana de confirmación
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Cancel Confirmation", "Are you sure you want to cancel?",
                                   QMessageBox::Yes|QMessageBox::No);
 
-    // Si el usuario elige "Yes", cerrar la aplicación
+    // Si el usuario elige Yes cerrar la aplicación
     if (reply == QMessageBox::Yes) {
         close();
     }
@@ -177,7 +177,7 @@ void MainWindow::nextSection() {
 
 
 void MainWindow::showSectionValues(Section1 *section1Widget, Section2 *section2Widget, Section3 *section3Widget, Section4 *section4Widget) {
-    // Crear el archivo section_values.txt independientemente de si se guarda la configuración o no
+    // Crear el archivo section_values.txt
     if (saveConfigurationToFile("section_values.txt", section1Widget, section2Widget, section3Widget, section4Widget)) {
         QMessageBox::information(this, "Configuration Saved", "Configuration saved to section_values.txt.");
     } else {
@@ -189,11 +189,11 @@ void MainWindow::showSectionValues(Section1 *section1Widget, Section2 *section2W
     reply = QMessageBox::question(this, "Save Configuration", "Do you want to save this configuration?",
                                   QMessageBox::Yes|QMessageBox::No);
 
-    // Si el usuario elige "Yes", permitirle ingresar un nombre para el archivo de configuración
+
     if (reply == QMessageBox::Yes) {
         QString fileName = QFileDialog::getSaveFileName(this, "Save Configuration", QDir::currentPath(), "Configuration Files (*.conf)");
         if (!fileName.isEmpty()) {
-            // Guardar la configuración en el archivo
+            // Guardar la configuración
             if (saveConfigurationToFile(fileName, section1Widget, section2Widget, section3Widget, section4Widget)) {
                 QMessageBox::information(this, "Configuration Saved", "Configuration saved successfully.");
             } else {
@@ -201,36 +201,49 @@ void MainWindow::showSectionValues(Section1 *section1Widget, Section2 *section2W
             }
         }
     }
+
+    // Ejecutar archivo python
+    QProcess *process = new QProcess(this);
+    QString currentPath = QDir::currentPath();
+    QString pythonScriptPath = currentPath + "/axolotl_1mat.py";
+    process->start("py", QStringList() << pythonScriptPath);
+    if (process->waitForStarted()) {
+        qDebug() << "Python script started successfully.";
+    } else {
+        qDebug() << "Failed to start Python script.";
+    }
+
+
 }
 
 
 bool MainWindow::saveConfigurationToFile(const QString &fileName, Section1 *section1Widget, Section2 *section2Widget, Section3 *section3Widget, Section4 *section4Widget) {
-    // Crear un archivo de texto para guardar la configuración
+    // Escribir archivo de texto
     QFile file(fileName);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
 
-        // Escribir los valores de la Section1 en el archivo
+        // valores de la Section1
         out << "Section1 Values:\n";
         out << "Plate X Value: " << section1Widget->getPlateXSpinBox() << "\n";
         out << "Plate Y Value: " << section1Widget->getPlateYSpinBox() << "\n";
         out << "Center X Value: " << section1Widget->getcenterXSpinBox() << "\n";
         out << "Center Y Value: " << section1Widget->getcenterYSpinBox() << "\n\n";
 
-        // Escribir los valores de la Section2 en el archivo
+        // valores de la Section2
         out << "Section2 Values:\n";
         out << "Size 1: " << section2Widget->getSize1() << "\n";
         out << "Size 2: " << section2Widget->getSize2() << "\n";
         out << "Shape Index 1: " << section2Widget->getShapeIndex1() << "\n";
         out << "Shape Index 2: " << section2Widget->getShapeIndex2() << "\n\n";
 
-        // Escribir los valores de la Section3 en el archivo
+        //  valores de la Section3
         out << "Section3 Values:\n";
         out << "Infill Value: " << section3Widget->getInfillValue() << "\n";
         out << "Shape Index: " << section3Widget->getShapeIndex() << "\n";
         out << "Strand Distance Value: " << section3Widget->getStrandDistanceValue() << "\n\n";
 
-        // Escribir los valores de la Section4 en el archivo
+        // valores de la Section4
         out << "Section4 Values:\n";
         QList<MaterialConfig> materialConfigs = section4Widget->getMaterialConfigs();
         for (const auto& materialConfig : materialConfigs) {
@@ -239,7 +252,7 @@ bool MainWindow::saveConfigurationToFile(const QString &fileName, Section1 *sect
             out << "Filament Amount: " << materialConfig.filamentAmount << "\n\n";
         }
 
-        // Cerrar el archivo
+
         file.close();
         return true;
     } else {
