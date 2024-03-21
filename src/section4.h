@@ -21,9 +21,11 @@ public:
     Section4(QWidget *parent = nullptr);
 
     QList<MaterialConfig> getMaterialConfigs() const;
+    int getNumMaterials() const;
 
 private slots:
     void updateMaterialNames(int numMaterials);
+    void updateMaterialConfigs();
 
 private:
     QSpinBox *numMaterialsSpinBox;

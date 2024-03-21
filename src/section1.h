@@ -11,8 +11,10 @@ class Section1 : public QWidget {
 public:
     explicit Section1(QWidget *parent = nullptr);
 
-    QSpinBox *getPlateXSpinBox() const;
-    QSpinBox *getPlateYSpinBox() const;
+    int getPlateXSpinBox() const;
+    int getPlateYSpinBox() const;
+    int getcenterXSpinBox() const;
+    int getcenterYSpinBox() const;
     void showManualCenterInput(QLabel *labelX, QLabel *labelY);
 
 private:

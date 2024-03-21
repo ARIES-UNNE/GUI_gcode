@@ -92,4 +92,18 @@ void Section2::handleShapeSelection(int index) {
     sizeLineEdit2->setVisible(showSizeLineEdit2);
 }
 
+int Section2::getSize1() const {
+    return sizeLineEdit->text().toInt();
+}
 
+int Section2::getSize2() const {
+    return sizeLineEdit2->text().toInt();
+}
+
+int Section2::getShapeIndex1() const {
+    return shapeComboBox->currentIndex();
+}
+
+int Section2::getShapeIndex2() const {
+    return shapeComboBox2->currentIndex();
+}

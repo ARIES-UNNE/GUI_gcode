@@ -91,3 +91,15 @@ void Section3::handleMethodSelection(int index) {
         milimetros->setVisible(true);
     }
 }
+
+int Section3::getInfillValue() const {
+    return infillSpinBox->value();
+}
+
+int Section3::getShapeIndex() const {
+    return shapeComboBox->currentIndex();
+}
+
+double Section3::getStrandDistanceValue() const {
+    return strandDistanceLineEdit->text().toDouble();
+}

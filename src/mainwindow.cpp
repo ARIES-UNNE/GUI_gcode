@@ -3,6 +3,7 @@
 #include "section2.h"
 #include "section3.h"
 #include "section4.h"
+#include "section5.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Crear un widget central para la ventana principal
@@ -33,12 +34,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Sección 4: Tamaño de la placa
     Section4 *section4Widget= new Section4(this);
 
+    // Sección 5: Tamaño de la placa
+    Section5 *section5Widget= new Section5(this);
+
     // Crear QStackedWidget para manejar las secciones
     stackedWidget = new QStackedWidget(this);
     stackedWidget->addWidget(section1Widget);
     stackedWidget->addWidget(section2Widget);
     stackedWidget->addWidget(section3Widget);
     stackedWidget->addWidget(section4Widget);
+    stackedWidget->addWidget(section5Widget);
 
     // Añadir QStackedWidget al formulario
     formLayout->addWidget(stackedWidget);
@@ -54,6 +59,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QPushButton *prevButton = new QPushButton("Previous", this);
     connect(prevButton, &QPushButton::clicked, this, &MainWindow::previousSection);
     buttonsLayout->addWidget(prevButton);
+
+    // Crear y configurar el botón para mostrar los valores de las Secciones
+    showValuesButton = new QPushButton("Show Section Values", this);
+    connect(showValuesButton, &QPushButton::clicked, this, [section1Widget, section2Widget, section3Widget, section4Widget, this]() {
+        showSectionValues(section1Widget, section2Widget,section3Widget, section4Widget);
+    });
+    showValuesButton->setVisible(false);
+
+    // Añadir el botón al formulario
+    formLayout->addWidget(showValuesButton);
 
     // Crear y configurar el botón para cancelar
     QPushButton *cancelButton = new QPushButton("Cancel", this);
@@ -86,6 +101,10 @@ void MainWindow::adjustSectionSize(int sectionIndex) {
         break;
     case 3:
         setFixedSize(430, 500);
+        break;
+    case 4:
+        setFixedSize(300, 300);
+        showValuesButton->setVisible(true);
         break;
     default:
         break;
@@ -122,9 +141,42 @@ void MainWindow::nextSection() {
     }
 }
 
+void MainWindow::showSectionValues(Section1 *section1Widget, Section2 *section2Widget, Section3 *section3Widget, Section4 *section4Widget) {
+    // Mostrar los valores de la Section1
+    int plateXValue = section1Widget->getPlateXSpinBox();
+    int plateYValue = section1Widget->getPlateYSpinBox();
+    int centerXValue = section1Widget->getcenterXSpinBox();
+    int centerYValue = section1Widget->getcenterYSpinBox();
+    QMessageBox::information(this, "Section1 Values", QString("Plate X Value: %1 \n Plate Y Value: %2 \n center X Value: %3 \n center Y Value: %4 \n\n ")
+                                                          .arg(plateXValue).arg(plateYValue).arg(centerXValue).arg(centerYValue));
+    // Mostrar los valores de la Section2
+    int size1Value = section2Widget->getSize1();
+    int size2Value = section2Widget->getSize2();
+    int shapeIndex1 = section2Widget->getShapeIndex1();
+    int shapeIndex2 = section2Widget->getShapeIndex2();
+    QMessageBox::information(this, "Section2 Values", QString("Size 1: %1\nSize 2: %2\nShape Index 1: %3\nShape Index 2: %4")
+                                                          .arg(size1Value).arg(size2Value).arg(shapeIndex1).arg(shapeIndex2));
 
-void MainWindow::generateGCode() {
-    // Implementar la lógica para generar el GCode basado en la entrada del usuario
-    // En este caso, simplemente mostrar un mensaje informativo
+    // Mostrar los valores de la Section3
+    int infillValue = section3Widget->getInfillValue();
+    int shapeIndex = section3Widget->getShapeIndex();
+    double strandDistanceValue = section3Widget->getStrandDistanceValue();
+    QMessageBox::information(this, "Section3 Values", QString("Infill Value: %1\nShape Index: %2\nStrand Distance Value: %3")
+                                                          .arg(infillValue).arg(shapeIndex).arg(strandDistanceValue));
 
+    // Mostrar los valores de la Section4
+    QList<MaterialConfig> materialConfigs = section4Widget->getMaterialConfigs();
+    QString materialConfigString;
+    for (const auto& materialConfig : materialConfigs) {
+        materialConfigString += QString("Material Name: %1\nNozzle Size: %2\nFilament Amount: %3\n\n")
+                                    .arg(materialConfig.name)
+                                    .arg(materialConfig.nozzleSize)
+                                    .arg(materialConfig.filamentAmount);
+    }
+    QMessageBox::information(this, "Section4 Values", materialConfigString);
 }
+
+
+
+
+

@@ -14,6 +14,12 @@ public:
 
     void handleShapeSelection(int index);
 
+    int getSize1() const;
+    int getSize2() const;
+    int getShapeIndex1() const;
+    int getShapeIndex2() const;
+
+
 private:
     QLineEdit *sizeLineEdit;
     QLineEdit *sizeLineEdit2;

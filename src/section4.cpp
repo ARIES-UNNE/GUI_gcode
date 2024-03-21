@@ -61,6 +61,32 @@ Section4::Section4(QWidget *parent) : QWidget(parent) {
     section4Widget->setFixedSize(400, 400);
 }
 
+void Section4::updateMaterialConfigs() {
+    // Limpiar la lista de configuraciones de materiales
+    materialConfigs.clear();
+
+    // Recorrer todos los widgets de nombres de materiales y actualizar la lista de configuraciones de materiales
+    for (int i = 0; i < materialNamesLayout->count(); ++i) {
+        QWidget *materialRowWidget = materialNamesLayout->itemAt(i)->widget();
+        if (materialRowWidget) {
+            QHBoxLayout *materialRowLayout = qobject_cast<QHBoxLayout*>(materialRowWidget->layout());
+            if (materialRowLayout) {
+                QLabel *materialLabel = qobject_cast<QLabel*>(materialRowLayout->itemAt(0)->widget());
+                QComboBox *nozzleComboBox = qobject_cast<QComboBox*>(materialRowLayout->itemAt(1)->widget());
+                QLineEdit *filamentLineEdit = qobject_cast<QLineEdit*>(materialRowLayout->itemAt(2)->widget());
+
+                if (materialLabel && nozzleComboBox && filamentLineEdit) {
+                    MaterialConfig config;
+                    config.name = materialLabel->text();
+                    config.nozzleSize = nozzleComboBox->currentIndex();
+                    config.filamentAmount = filamentLineEdit->text().toDouble();
+                    materialConfigs.append(config);
+                }
+            }
+        }
+    }
+}
+
 void Section4::updateMaterialNames(int numMaterials) {
     // Limpiar cualquier widget anterior en el contenedor
     QLayoutItem *child;
@@ -68,9 +94,6 @@ void Section4::updateMaterialNames(int numMaterials) {
         delete child->widget();
         delete child;
     }
-
-    // Limpiar la lista de configuraciones de materiales
-    materialConfigs.clear();
 
     // Agregar nuevos widgets para los nombres de los materiales según el número seleccionado
     for (int i = 1; i <= numMaterials; ++i) {
@@ -94,34 +117,32 @@ void Section4::updateMaterialNames(int numMaterials) {
         filamentLineEdit->setMinimumWidth(70);
         filamentLineEdit->setMaximumWidth(70);
 
-        // Almacena la configuración del material en la lista
-        MaterialConfig config;
-        config.name = "Material " + QString::number(i);
-        config.nozzleSize = nozzleComboBox->currentIndex();
-        config.filamentAmount = filamentLineEdit->text().toDouble();
-
         // Agregar widgets al diseño de cada fila
         materialRowLayout->addWidget(materialLabel);
         materialRowLayout->addWidget(nozzleComboBox);
         materialRowLayout->addWidget(filamentLineEdit);
 
-
-        materialRowLayout->setAlignment(materialLabel, Qt::AlignLeft);
-        materialRowLayout->setAlignment(nozzleComboBox, Qt::AlignCenter);
-        materialRowLayout->setAlignment(filamentLineEdit, Qt::AlignRight);
-
-
         materialNamesLayout->addWidget(materialRow);
 
-        // Agregar la configuración del material a la lista
-        materialConfigs.append(config);
+        // Conectar las señales de edición de los widgets a la función de actualización de configuraciones de materiales
+        connect(nozzleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Section4::updateMaterialConfigs);
+        connect(filamentLineEdit, &QLineEdit::textChanged, this, &Section4::updateMaterialConfigs);
     }
 
     // Asegurar que el contenedor se redibuje
     materialNamesContainer->update();
+
+    // Actualizar las configuraciones de materiales una vez se han creado los nuevos widgets
+    updateMaterialConfigs();
 }
+
 
 // Función para obtener la lista de configuraciones de materiales
 QList<MaterialConfig> Section4::getMaterialConfigs() const {
     return materialConfigs;
+}
+
+
+int Section4::getNumMaterials() const {
+    return numMaterialsSpinBox->value();
 }

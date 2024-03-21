@@ -13,6 +13,10 @@ public:
     explicit Section3(QWidget *parent = nullptr);
     void handleMethodSelection(int index);
 
+    int getInfillValue() const;
+    int getShapeIndex() const;
+    double getStrandDistanceValue() const;
+
 private:
     QSpinBox *infillSpinBox;
     QComboBox *shapeComboBox;

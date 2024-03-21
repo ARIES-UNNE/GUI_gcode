@@ -91,12 +91,20 @@ Section1::Section1(QWidget *parent) : QWidget(parent) {
 }
 
 
-QSpinBox *Section1::getPlateXSpinBox() const {
-    return plateXSpinBox;
+int Section1::getPlateXSpinBox() const {
+    return plateXSpinBox->value();
 }
 
-QSpinBox *Section1::getPlateYSpinBox() const {
-    return plateYSpinBox;
+int Section1::getPlateYSpinBox() const {
+    return plateYSpinBox->value();
+}
+
+int Section1::getcenterXSpinBox() const {
+    return centerXSpinBox->value();
+}
+
+int Section1::getcenterYSpinBox() const {
+    return centerYSpinBox->value();
 }
 
 void Section1::showManualCenterInput(QLabel *labelX, QLabel *labelY) {
