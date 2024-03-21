@@ -29,6 +29,7 @@ private slots:
     void generateGCode();
     void previousSection();
     void adjustSectionSize(int sectionIndex);
+    void cancelConfirmation();
 
 };
 

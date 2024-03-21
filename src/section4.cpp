@@ -30,9 +30,6 @@ Section4::Section4(QWidget *parent) : QWidget(parent) {
     materialNamesContainer = new QWidget(this);
     materialNamesLayout = new QVBoxLayout(materialNamesContainer);
 
-    // Cambia la alineación del layout dentro del QScrollArea
-    materialNamesLayout->setAlignment(Qt::AlignTop  | Qt::AlignCenter);
-
     // Configura el tamaño del contenido para que se ajuste al ancho del QScrollArea
     materialNamesContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 
@@ -42,11 +39,15 @@ Section4::Section4(QWidget *parent) : QWidget(parent) {
 
     QLabel *headerLabel1 = new QLabel("Material", this);
     QLabel *headerLabel2 = new QLabel("Nozzle", this);
-    QLabel *headerLabel3 = new QLabel("Filament", this);
+    QLabel *headerLabel3 = new QLabel("Filament mm", this);
 
     headerLayout->addWidget(headerLabel1);
     headerLayout->addWidget(headerLabel2);
     headerLayout->addWidget(headerLabel3);
+
+    headerLayout->setAlignment(headerLabel1, Qt::AlignLeft);
+    headerLayout->setAlignment(headerLabel2, Qt::AlignCenter);
+    headerLayout->setAlignment(headerLabel3, Qt::AlignRight);
 
     // Agregar el encabezado al principio del materialNamesLayout
     section4Layout->addWidget(headerContainer);
@@ -73,35 +74,44 @@ void Section4::updateMaterialNames(int numMaterials) {
 
     // Agregar nuevos widgets para los nombres de los materiales según el número seleccionado
     for (int i = 1; i <= numMaterials; ++i) {
-        QLabel *materialLabel = new QLabel("Material " + QString::number(i), this);
+        // Crear widgets para cada columna (Material, Nozzle, Filament)
+        QWidget *materialRow = new QWidget(this);
+        QHBoxLayout *materialRowLayout = new QHBoxLayout(materialRow);
 
+        QLabel *materialLabel = new QLabel("Material " + QString::number(i), this);
         QComboBox *nozzleComboBox = new QComboBox(this);
         nozzleComboBox->addItem("0.2 mm");
         nozzleComboBox->addItem("0.4 mm");
         nozzleComboBox->addItem("0.6 mm");
-
-        // Nuevo LineEdit para introducir el filamento en mm
         QLineEdit *filamentLineEdit = new QLineEdit(this);
+        filamentLineEdit->setValidator(new QDoubleValidator(this));
 
-        filamentLineEdit->setMinimumWidth(100);
-        filamentLineEdit->setMaximumWidth(100);
-
-        QDoubleValidator* Validator = new QDoubleValidator(this);
-        filamentLineEdit->setValidator(Validator);
+        // Ajustar el tamaño mínimo y máximo de cada columna
+        materialLabel->setMinimumWidth(70);
+        materialLabel->setMaximumWidth(70);
+        nozzleComboBox->setMinimumWidth(70);
+        nozzleComboBox->setMaximumWidth(70);
+        filamentLineEdit->setMinimumWidth(70);
+        filamentLineEdit->setMaximumWidth(70);
 
         // Almacena la configuración del material en la lista
         MaterialConfig config;
         config.name = "Material " + QString::number(i);
         config.nozzleSize = nozzleComboBox->currentIndex();
-        // Obtiene el valor del LineEdit y almacénalo como cantidad de filamento
         config.filamentAmount = filamentLineEdit->text().toDouble();
 
-        // Agregar el combo, el LineEdit y el label al layout
-        QHBoxLayout *materialLayout = new QHBoxLayout;
-        materialLayout->addWidget(materialLabel);
-        materialLayout->addWidget(nozzleComboBox);
-        materialLayout->addWidget(filamentLineEdit);
-        materialNamesLayout->addLayout(materialLayout);
+        // Agregar widgets al diseño de cada fila
+        materialRowLayout->addWidget(materialLabel);
+        materialRowLayout->addWidget(nozzleComboBox);
+        materialRowLayout->addWidget(filamentLineEdit);
+
+
+        materialRowLayout->setAlignment(materialLabel, Qt::AlignLeft);
+        materialRowLayout->setAlignment(nozzleComboBox, Qt::AlignCenter);
+        materialRowLayout->setAlignment(filamentLineEdit, Qt::AlignRight);
+
+
+        materialNamesLayout->addWidget(materialRow);
 
         // Agregar la configuración del material a la lista
         materialConfigs.append(config);
