@@ -11,6 +11,7 @@
 #include <qlabel.h>
 #include <QLineEdit>
 #include <qsizegrip.h>
+#include "section0.h"
 #include "section1.h"
 #include "section2.h"
 #include "section3.h"
@@ -28,8 +29,11 @@ private:
     QPushButton *generateButton;
     QPushButton *showValuesButton;
 
-    // Función para aplicar los estilos de la interfaz
+
     void applyStyles();
+
+    bool saveConfigurationToFile(const QString &fileName, Section1 *section1Widget, Section2 *section2Widget, Section3 *section3Widget, Section4 *section4Widget);
+
 
 private slots:
     void nextSection();

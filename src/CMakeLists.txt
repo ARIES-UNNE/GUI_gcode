@@ -32,6 +32,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         section3.h section3.cpp
         section4.h section4.cpp
         section5.h section5.cpp
+        section0.h section0.cpp
 
     )
 # Define target properties for Android with Qt 6 as:
