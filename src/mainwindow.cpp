@@ -80,6 +80,7 @@ void MainWindow::nextSection() {
 }
 
 void MainWindow::generateGCode() {
-    
+    // Implementar la lógica para generar el GCode basado en la entrada del usuario
+    // En este caso, simplemente mostrar un mensaje informativo
 
 }

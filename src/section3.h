@@ -17,6 +17,9 @@ private:
     QSpinBox *infillSpinBox;
     QComboBox *shapeComboBox;
     QLineEdit *strandDistanceLineEdit;
+
+    QLabel *porcentaje;
+    QLabel *milimetros;
 };
 
 #endif // SECTION3_H

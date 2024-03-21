@@ -44,7 +44,7 @@ Section1::Section1(QWidget *parent) : QWidget(parent) {
 
 
     // Ajustar el tamaño mínimo de los spinboxes
-    plateYSpinBox->setMinimumWidth(200);  
+    plateYSpinBox->setMinimumWidth(200);  // Ajusta el valor según sea necesario
     centerYSpinBox->setMinimumWidth(200);
 
     horizontalLayout2S1->addWidget(labelY);
