@@ -28,6 +28,8 @@ private:
     QPushButton *generateButton;
     QPushButton *showValuesButton;
 
+    // Función para aplicar los estilos de la interfaz
+    void applyStyles();
 
 private slots:
     void nextSection();

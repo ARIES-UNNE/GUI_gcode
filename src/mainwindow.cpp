@@ -1,18 +1,23 @@
 #include "mainwindow.h"
+#include <QFile>
+#include <QTextStream>
+#include <QMessageBox>
 #include "section1.h"
 #include "section2.h"
 #include "section3.h"
 #include "section4.h"
+#include <QDir>
+#include <QDebug>
 #include "section5.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    // Crear un widget central para la ventana principal
+    // Crear un widget central 
     centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
 
     // Configurar la ventana principal como no redimensionable
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setFixedSize(300, 300);  // Establecer el tamaño fijo
+    setFixedSize(300, 300);
 
     // Ocultar la esquina de redimensionamiento
     QSizeGrip *sizeGrip = findChild<QSizeGrip*>();
@@ -37,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Sección 5: Tamaño de la placa
     Section5 *section5Widget= new Section5(this);
 
-    // Crear QStackedWidget para manejar las secciones
+    
     stackedWidget = new QStackedWidget(this);
     stackedWidget->addWidget(section1Widget);
     stackedWidget->addWidget(section2Widget);
@@ -45,13 +50,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     stackedWidget->addWidget(section4Widget);
     stackedWidget->addWidget(section5Widget);
 
-    // Añadir QStackedWidget al formulario
+
     formLayout->addWidget(stackedWidget);
 
-    // Crear y configurar el layout horizontal para los botones
+    // Crear  el layout horizontal para los botones
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
 
-    // Crear y configurar el botón para pasar a la siguiente sección
+    // Crear  el botón para pasar a la siguiente sección
     QPushButton *nextButton = new QPushButton("Next", this);
     connect(nextButton, &QPushButton::clicked, this, &MainWindow::nextSection);
     buttonsLayout->addWidget(nextButton);
@@ -60,14 +65,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(prevButton, &QPushButton::clicked, this, &MainWindow::previousSection);
     buttonsLayout->addWidget(prevButton);
 
-    // Crear y configurar el botón para mostrar los valores de las Secciones
+    // Crear el botón para mostrar los valores de las Secciones
     showValuesButton = new QPushButton("Show Section Values", this);
     connect(showValuesButton, &QPushButton::clicked, this, [section1Widget, section2Widget, section3Widget, section4Widget, this]() {
         showSectionValues(section1Widget, section2Widget,section3Widget, section4Widget);
     });
     showValuesButton->setVisible(false);
 
-    // Añadir el botón al formulario
+
     formLayout->addWidget(showValuesButton);
 
     // Crear y configurar el botón para cancelar
@@ -82,8 +87,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     buttonsLayout->setAlignment(cancelButton, Qt::AlignRight);
 
 
-    // Añadir el layout de botones al formulario
+
     formLayout->addRow(buttonsLayout);
+
+    // Aplicar estilos
+    applyStyles();
+}
+
+
+// work in progress
+void MainWindow::applyStyles() {
+    // Estilo general de la ventana
+    setStyleSheet("MainWindow { background-color: #f0f0f0; }");
+
+    // Estilo de los botones
+    QString buttonStyle = "QPushButton { background-color: #4CAF50; color: white; border: none;"
+                          "border-radius: 5px; padding: 10px 24px; font-size: 14px; }"
+                          "QPushButton:hover { background-color: #45a049; }";
+    showValuesButton->setStyleSheet(buttonStyle);
 }
 
 
@@ -92,15 +113,19 @@ void MainWindow::adjustSectionSize(int sectionIndex) {
     switch (sectionIndex) {
     case 0:
         setFixedSize(300, 300);
+        showValuesButton->setVisible(false);
         break;
     case 1:
         setFixedSize(300, 300);
+        showValuesButton->setVisible(false);
         break;
     case 2:
         setFixedSize(300, 300);
+        showValuesButton->setVisible(false);
         break;
     case 3:
         setFixedSize(430, 500);
+        showValuesButton->setVisible(false);
         break;
     case 4:
         setFixedSize(300, 300);
@@ -142,39 +167,51 @@ void MainWindow::nextSection() {
 }
 
 void MainWindow::showSectionValues(Section1 *section1Widget, Section2 *section2Widget, Section3 *section3Widget, Section4 *section4Widget) {
-    // Mostrar los valores de la Section1
-    int plateXValue = section1Widget->getPlateXSpinBox();
-    int plateYValue = section1Widget->getPlateYSpinBox();
-    int centerXValue = section1Widget->getcenterXSpinBox();
-    int centerYValue = section1Widget->getcenterYSpinBox();
-    QMessageBox::information(this, "Section1 Values", QString("Plate X Value: %1 \n Plate Y Value: %2 \n center X Value: %3 \n center Y Value: %4 \n\n ")
-                                                          .arg(plateXValue).arg(plateYValue).arg(centerXValue).arg(centerYValue));
-    // Mostrar los valores de la Section2
-    int size1Value = section2Widget->getSize1();
-    int size2Value = section2Widget->getSize2();
-    int shapeIndex1 = section2Widget->getShapeIndex1();
-    int shapeIndex2 = section2Widget->getShapeIndex2();
-    QMessageBox::information(this, "Section2 Values", QString("Size 1: %1\nSize 2: %2\nShape Index 1: %3\nShape Index 2: %4")
-                                                          .arg(size1Value).arg(size2Value).arg(shapeIndex1).arg(shapeIndex2));
 
-    // Mostrar los valores de la Section3
-    int infillValue = section3Widget->getInfillValue();
-    int shapeIndex = section3Widget->getShapeIndex();
-    double strandDistanceValue = section3Widget->getStrandDistanceValue();
-    QMessageBox::information(this, "Section3 Values", QString("Infill Value: %1\nShape Index: %2\nStrand Distance Value: %3")
-                                                          .arg(infillValue).arg(shapeIndex).arg(strandDistanceValue));
+    QFile file("section_values.txt");
 
-    // Mostrar los valores de la Section4
-    QList<MaterialConfig> materialConfigs = section4Widget->getMaterialConfigs();
-    QString materialConfigString;
-    for (const auto& materialConfig : materialConfigs) {
-        materialConfigString += QString("Material Name: %1\nNozzle Size: %2\nFilament Amount: %3\n\n")
-                                    .arg(materialConfig.name)
-                                    .arg(materialConfig.nozzleSize)
-                                    .arg(materialConfig.filamentAmount);
+    // Abrir el archivo en modo de escritura
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        qDebug() << QDir::currentPath();
+        // Guardar los valores de la Section1 en el archivo
+        out << "Section1 Values:\n";
+        out << "Plate X Value: " << section1Widget->getPlateXSpinBox() << "\n";
+        out << "Plate Y Value: " << section1Widget->getPlateYSpinBox() << "\n";
+        out << "Center X Value: " << section1Widget->getcenterXSpinBox() << "\n";
+        out << "Center Y Value: " << section1Widget->getcenterYSpinBox() << "\n\n";
+
+        // Guardar los valores de la Section2 en el archivo
+        out << "Section2 Values:\n";
+        out << "Size 1: " << section2Widget->getSize1() << "\n";
+        out << "Size 2: " << section2Widget->getSize2() << "\n";
+        out << "Shape Index 1: " << section2Widget->getShapeIndex1() << "\n";
+        out << "Shape Index 2: " << section2Widget->getShapeIndex2() << "\n\n";
+
+        // Guardar los valores de la Section3 en el archivo
+        out << "Section3 Values:\n";
+        out << "Infill Value: " << section3Widget->getInfillValue() << "\n";
+        out << "Shape Index: " << section3Widget->getShapeIndex() << "\n";
+        out << "Strand Distance Value: " << section3Widget->getStrandDistanceValue() << "\n\n";
+
+        // Guardar los valores de la Section4 en el archivo
+        out << "Section4 Values:\n";
+        QList<MaterialConfig> materialConfigs = section4Widget->getMaterialConfigs();
+        for (const auto& materialConfig : materialConfigs) {
+            out << "Material Name: " << materialConfig.name << "\n";
+            out << "Nozzle Size: " << materialConfig.nozzleSize << "\n";
+            out << "Filament Amount: " << materialConfig.filamentAmount << "\n\n";
+        }
+
+        file.close();
+
+        QMessageBox::information(this, "File Saved", "Section values saved to section_values.txt");
+    } else {
+        
+        QMessageBox::critical(this, "Error", "Failed to open section_values.txt for writing");
     }
-    QMessageBox::information(this, "Section4 Values", materialConfigString);
 }
+
 
 
 
