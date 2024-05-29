@@ -3,7 +3,15 @@
 
 #include <QWidget>
 #include <QSpinBox>
-#include <qlabel.h>
+#include <QLabel>
+#include <QPushButton>
+#include <QFormLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QSpacerItem>
+
 
 class Section1 : public QWidget {
     Q_OBJECT
@@ -15,6 +23,11 @@ public:
     int getPlateYSpinBox() const;
     int getcenterXSpinBox() const;
     int getcenterYSpinBox() const;
+
+signals:
+    void valueChanged();
+
+private slots:
     void showManualCenterInput(QLabel *labelX, QLabel *labelY);
 
 private:

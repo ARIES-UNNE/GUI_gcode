@@ -4,6 +4,14 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QScrollArea>
+#include <QDir>
+#include <QLabel>
+#include <QProcess>
+#include <QCoreApplication>
+#include <QTextStream>
+#include <QFile>
+#include <QMessageBox>
 #include <QFileDialog>
 
 class Section0 : public QWidget {

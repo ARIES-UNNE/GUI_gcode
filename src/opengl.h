@@ -1,10 +1,35 @@
-#ifndef OPENGL_H
-#define OPENGL_H
+#ifndef OPENGLWIDGET_H
+#define OPENGLWIDGET_H
 
-class OpenGL
-{
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+#include <QTimer>
+#include <QDateTime>
+
+class OpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions {
+    Q_OBJECT
+
 public:
-    OpenGL();
+    explicit OpenGLWidget(QWidget *parent = nullptr);
+    ~OpenGLWidget();
+
+protected:
+    void initializeGL() override;
+    void resizeGL(int w, int h) override;
+    void paintGL() override;
+
+private:
+    QTimer *fileCheckTimer;
+    QString filePath;
+    QDateTime lastModifiedTime;
+
+    QVector<QVector3D> vertices;
+
+    void parseGCode(const QString &filePath);
+    bool fileModified();
+
+private slots:
+    void checkFile();
 };
 
-#endif // OPENGL_H
+#endif // OPENGLWIDGET_H

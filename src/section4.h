@@ -12,6 +12,7 @@ struct MaterialConfig {
     QString name;
     int nozzleSize;
     double filamentAmount;
+    double algo;
 };
 
 class Section4 : public QWidget {
@@ -22,6 +23,9 @@ public:
 
     QList<MaterialConfig> getMaterialConfigs() const;
     int getNumMaterials() const;
+
+signals:
+    void valueChanged();
 
 private slots:
     void updateMaterialNames(int numMaterials);

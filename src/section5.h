@@ -2,7 +2,8 @@
 #define SECTION5_H
 
 #include <QWidget>
-#include <QPushButton>
+#include <QVBoxLayout>
+#include <QLabel>
 
 class Section5 : public QWidget
 {

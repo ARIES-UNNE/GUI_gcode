@@ -1,55 +1,46 @@
 #include "section3.h"
-#include <QFormLayout>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QSpinBox>
-#include <QLineEdit>
 
 Section3::Section3(QWidget *parent) : QWidget(parent) {
-    // Sección 3: Infill o Strand Distance
+
     QWidget *section3Widget = new QWidget(this);
 
-    // Crear widgets
     infillSpinBox = new QSpinBox(this);
     infillSpinBox->setRange(0, 100);
 
     strandDistanceLineEdit = new QLineEdit(this);
 
-    // ocultar ambos widgets
     infillSpinBox->setVisible(false);
     strandDistanceLineEdit->setVisible(false);
 
-    // Crear un diseño vertical
     QVBoxLayout *section3Layout = new QVBoxLayout(section3Widget);
     section3Layout->setAlignment(Qt::AlignTop | Qt::AlignCenter);
     section3Widget->setLayout(section3Layout);
 
-    // Crear un QComboBox
     shapeComboBox = new QComboBox(this);
     shapeComboBox->setPlaceholderText("Seleccione un método");
     shapeComboBox->addItem("Infill");
     shapeComboBox->addItem("Strand Distance");
 
-    shapeComboBox->setMinimumWidth(250);
+    shapeComboBox->setMinimumWidth(200);
+    shapeComboBox->setMaximumWidth(200);
     infillSpinBox->setMinimumWidth(200);
     strandDistanceLineEdit->setMinimumWidth(200);
     strandDistanceLineEdit->setMaximumWidth(200);
-
 
     QLabel *title = new QLabel("Selección de método", this);
     porcentaje = new QLabel("%: ", this);
     milimetros = new QLabel("mm: ", this);
 
-    // ocultar ambos widgets
+    title->setMinimumWidth(200);
+    title->setMaximumWidth(200);
+
     porcentaje->setVisible(false);
     milimetros->setVisible(false);
     milimetros->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    QDoubleValidator* Validator = new QDoubleValidator(this);
-    strandDistanceLineEdit->setValidator(Validator);
+    QDoubleValidator* validator = new QDoubleValidator(this);
+    strandDistanceLineEdit->setValidator(validator);
 
-    // Layout horizontal
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
     QHBoxLayout *horizontalLayout2 = new QHBoxLayout;
 
@@ -59,30 +50,72 @@ Section3::Section3(QWidget *parent) : QWidget(parent) {
     horizontalLayout2->addWidget(milimetros);
     horizontalLayout2->addWidget(strandDistanceLineEdit);
 
-    // Configurar alineación y espaciado
     horizontalLayout->setAlignment(Qt::AlignCenter);
     horizontalLayout2->setAlignment(Qt::AlignCenter);
 
+    QVBoxLayout *titleAndComboBoxLayout = new QVBoxLayout;
+    titleAndComboBoxLayout->setAlignment(Qt::AlignCenter);
+    titleAndComboBoxLayout->addWidget(title);
+    titleAndComboBoxLayout->addWidget(shapeComboBox);
 
-    section3Layout->addWidget(title);
-    section3Layout->addWidget(shapeComboBox);
+    section3Layout->addItem(new QSpacerItem(20, 50, QSizePolicy::Minimum));
+    section3Layout->addLayout(titleAndComboBoxLayout);
     section3Layout->addLayout(horizontalLayout);
     section3Layout->addLayout(horizontalLayout2);
 
-    // Conectar la señal
     connect(shapeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Section3::handleMethodSelection);
+    connect(infillSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &Section3::valueChanged);
+    connect(strandDistanceLineEdit, &QLineEdit::textChanged, [this]() {
+        emit valueChanged();
+    });
+    connect(shapeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+        emit valueChanged();
+    });
 
-    section3Widget->setFixedSize(280, 200);
+    section3Widget->setFixedSize(579, 544);
+
+
+    setStyleSheet(
+        "QSpinBox, QLineEdit {"
+        "    border: 1px solid #ddd;"
+        "    border-radius: 3px;"
+        "    padding: 5px;"
+        "    font-size: 14px;"
+        "}"
+        "QComboBox {"
+        "    border: 1px solid #ddd;"
+        "    border-radius: 3px;"
+        "    padding: 5px;"
+        "    font-size: 14px;"
+        "}"
+        "QComboBox QAbstractItemView {"
+        "    border: 1px solid #ddd;"
+        "    selection-background-color: #4CAF50;"
+        "    selection-color: white;"
+        "}"
+        "QWidget {"
+        "    background-color: #f9f9f9;"
+        "    padding: 10px;"
+        "    border: 1px solid #ccc;"
+        "    border-radius: 10px;"
+        "    margin-left: 9px;"
+        "    margin-top: 9px;"
+        "}"
+        "QSpinBox::up-button {"
+        "    width: 0px;"
+        "}"
+        "QSpinBox::down-button {"
+        "    width: 0px;"
+        "}"
+        );
 }
 
 void Section3::handleMethodSelection(int index) {
-    // Ocultar ambos widgets al principio
     infillSpinBox->setVisible(false);
     strandDistanceLineEdit->setVisible(false);
     porcentaje->setVisible(false);
     milimetros->setVisible(false);
 
-    // Mostrar el widget correspondiente según la selección
     if (index == 0) {
         infillSpinBox->setVisible(true);
         porcentaje->setVisible(true);

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(TFGproyect VERSION 0.1 LANGUAGES CXX)
+project(TFGproyecto VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -9,63 +9,64 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGL)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+# Encontrar los paquetes necesarios de Qt y OpenGL
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets OpenGLWidgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets OpenGLWidgets)
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
 
+# Archivos fuente y encabezados
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
+    section0.h
+    section0.cpp
+    section1.h
+    section1.cpp
+    section2.h
+    section2.cpp
+    section3.h
+    section3.cpp
+    section4.h
+    section4.cpp
+    section5.h
+    section5.cpp
+    opengl.h
+    opengl.cpp
 )
 
+# Añadir ejecutable según la versión de Qt
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(TFGproyect
+    qt_add_executable(TFGproyecto
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        section1.h
-        section2.h
-        section3.h
-        section4.h
-        section1.cpp
-        section2.h section2.cpp
-        section3.h section3.cpp
-        section4.h section4.cpp
-
-        section0.h section0.cpp
-        section5.h section5.cpp
-        opengl.h opengl.cpp
-
+        startpage.h startpage.cpp
 
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET TFGproyect APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(TFGproyect SHARED
+        add_library(TFGproyecto SHARED
             ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(TFGproyect
+        add_executable(TFGproyecto
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
-target_link_libraries(TFGproyect PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+# Enlazar bibliotecas Qt y OpenGL
+target_link_libraries(TFGproyecto PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(TFGproyecto PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+target_link_libraries(TFGproyecto PRIVATE ${OPENGL_gl_LIBRARY})
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
+# Propiedades del ejecutable para macOS/iOS
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.TFGproyect)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.TFGproyecto)
 endif()
-set_target_properties(TFGproyect PROPERTIES
+set_target_properties(TFGproyecto PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -73,16 +74,15 @@ set_target_properties(TFGproyect PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+# Incluir y configurar la instalación
 include(GNUInstallDirs)
-install(TARGETS TFGproyect
+install(TARGETS TFGproyecto
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+# Finalizar el ejecutable para Qt 6
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(TFGproyect)
+    qt_finalize_executable(TFGproyecto)
 endif()
-
-
-target_link_libraries(TFGproyect PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::OpenGL)

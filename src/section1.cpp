@@ -1,14 +1,6 @@
 #include "section1.h"
-#include <QFormLayout>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QPushButton>
 
 Section1::Section1(QWidget *parent) : QWidget(parent) {
-
-
-    // Sección 1: Tamaño de la placa
     QWidget *section1Widget = new QWidget(this);
     plateXSpinBox = new QSpinBox(this);
     plateYSpinBox = new QSpinBox(this);
@@ -18,22 +10,18 @@ Section1::Section1(QWidget *parent) : QWidget(parent) {
     centerXSpinBox->setVisible(false);
     centerYSpinBox->setVisible(false);
 
-    // Etiquetas para X e Y
     QLabel *labelX = new QLabel("X:", this);
     QLabel *labelY = new QLabel("Y:", this);
     QLabel *labelTitle = new QLabel("Tamaño de la placa:", this);
 
     QVBoxLayout *section1Layout = new QVBoxLayout(section1Widget);
-    section1Layout->setAlignment(Qt::AlignTop | Qt::AlignCenter);
+    section1Layout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 
     section1Widget->setLayout(section1Layout);
 
-
-    // Diseño horizontal para colocar las etiquetas y spinboxes
     QHBoxLayout *horizontalLayoutS1 = new QHBoxLayout;
+    horizontalLayoutS1->setAlignment(Qt::AlignHCenter);
 
-
-    // Ajustar el tamaño mínimo de los spinboxes
     plateXSpinBox->setMinimumWidth(200);
     centerXSpinBox->setMinimumWidth(200);
 
@@ -41,56 +29,101 @@ Section1::Section1(QWidget *parent) : QWidget(parent) {
     horizontalLayoutS1->addWidget(plateXSpinBox);
 
     QHBoxLayout *horizontalLayout2S1 = new QHBoxLayout;
+    horizontalLayout2S1->setAlignment(Qt::AlignHCenter);
 
-
-    // Ajustar el tamaño mínimo de los spinboxes
     plateYSpinBox->setMinimumWidth(200);
     centerYSpinBox->setMinimumWidth(200);
 
     horizontalLayout2S1->addWidget(labelY);
     horizontalLayout2S1->addWidget(plateYSpinBox);
 
-    // Agregar los diseños horizontales
+    QSpacerItem *verticalSpacer = new QSpacerItem(20, 50, QSizePolicy::Minimum);
+
+    section1Layout->addItem(verticalSpacer);
     section1Layout->addWidget(labelTitle);
     section1Layout->addLayout(horizontalLayoutS1);
     section1Layout->addLayout(horizontalLayout2S1);
 
-    // Etiquetas para las coordenadas X e Y
     QLabel *labelCenterX = new QLabel("X:", this);
     QLabel *labelCenterY = new QLabel("Y:", this);
 
     labelCenterX->setVisible(false);
     labelCenterY->setVisible(false);
 
-    // Diseño horizontal
     QHBoxLayout *horizontalLayoutCenterX = new QHBoxLayout;
+    horizontalLayoutCenterX->setAlignment(Qt::AlignHCenter);
 
     horizontalLayoutCenterX->addWidget(labelCenterX);
     horizontalLayoutCenterX->addWidget(centerXSpinBox);
 
     QHBoxLayout *horizontalLayoutCenterY = new QHBoxLayout;
+    horizontalLayoutCenterY->setAlignment(Qt::AlignHCenter);
 
     horizontalLayoutCenterY->addWidget(labelCenterY);
     horizontalLayoutCenterY->addWidget(centerYSpinBox);
 
-    // Botón para introducir manualmente el centro
     QPushButton *manualCenterButton = new QPushButton("Introducir Manualmente el centro", this);
 
-    // Conectar el botón
     connect(manualCenterButton, &QPushButton::clicked, [=]() {
         showManualCenterInput(labelCenterX, labelCenterY);
     });
 
-    // Añadir los widgets
+    connect(plateXSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &Section1::valueChanged);
+    connect(plateYSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &Section1::valueChanged);
+    connect(centerXSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &Section1::valueChanged);
+    connect(centerYSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &Section1::valueChanged);
+
     section1Layout->addWidget(manualCenterButton);
     section1Layout->addLayout(horizontalLayoutCenterX);
     section1Layout->addLayout(horizontalLayoutCenterY);
 
+    section1Widget->setFixedSize(570, 535);
 
-    section1Widget->setFixedSize(280,200);
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->addWidget(section1Widget);
+    mainLayout->setAlignment(Qt::AlignCenter);
+    setLayout(mainLayout);
+    setStyleSheet("QLabel {"
+                  "    font-size: 14px;"
+                  "    color: #333;"
+                  "}"
+                  "QPushButton {"
+                  "    background-color: #4CAF50;"
+                  "    color: #333;"
+                  "    border: none;"
+                  "    border-radius: 5px;"
+                  "    font-size: 14px;"
+                  "    padding: 5px 10px;"
+                  "}"
+                  "QPushButton:hover {"
+                  "    background-color: #45a049;"
+                  "    color: white;"
+                  "}"
+                  "QSpinBox {"
+                  "    border: 1px solid #ddd;"
+                  "    border-radius: 3px;"
+                  "    padding: 5px;"
+                  "    font-size: 14px;"
+                  "}"
+                  "QSpinBox::up-button {"
+                  "    width: 0px;"
+                  "}"
+                  "QSpinBox::down-button {"
+                  "    width: 0px;"
+                  "}"
+                  "QSpinBox::up-button:hover {"
+                  "    background-color: #ddd;"
+                  "}"
+                  "QSpinBox::down-button:hover {"
+                  "    background-color: #ddd;"
+                  "}"
+                  "QWidget {"
+                  "    background-color: #f9f9f9;"
+                  "    padding: 10px;"
+                  "    border: 1px solid #ccc;"
+                  "    border-radius: 10px;"
+                  "}");
 }
-
-
 int Section1::getPlateXSpinBox() const {
     return plateXSpinBox->value();
 }
@@ -108,12 +141,9 @@ int Section1::getcenterYSpinBox() const {
 }
 
 void Section1::showManualCenterInput(QLabel *labelX, QLabel *labelY) {
-    // Alternar la visibilidad de los spinboxes y etiquetas del centro
     bool isVisible = centerXSpinBox->isVisible();
     centerXSpinBox->setVisible(!isVisible);
     centerYSpinBox->setVisible(!isVisible);
     labelX->setVisible(!isVisible);
     labelY->setVisible(!isVisible);
 }
-
-

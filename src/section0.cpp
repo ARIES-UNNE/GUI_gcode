@@ -1,21 +1,75 @@
 #include "section0.h"
-#include <QDir>
-#include <QCoreApplication>
-#include <QTextStream>
-#include <QFile>
-#include <QMessageBox>
 
 Section0::Section0(QWidget *parent) : QWidget(parent) {
-    layout = new QVBoxLayout(this);
-
-    changeDirectoryButton = new QPushButton("Change Directory", this);
-    connect(changeDirectoryButton, &QPushButton::clicked, this, &Section0::changeDirectory);
-    layout->addWidget(changeDirectoryButton);
+    QScrollArea *scrollArea = new QScrollArea(this);
+    QWidget *scrollWidget = new QWidget(this);
+    layout = new QVBoxLayout(scrollWidget);
+    layout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 
     directoryPath = QCoreApplication::applicationDirPath();
     refreshConfigurations();
 
-    setLayout(layout);
+    scrollArea->setMaximumSize(600, 400);
+    scrollArea->setMinimumSize(550, 400);
+
+    scrollArea->setStyleSheet("QScrollArea {"
+                              "    border: 2px solid #4CAF50;"
+                              "    border-radius: 5px;"
+                              "    background: #f9f9f9;"
+                              "}"
+                              "QScrollBar:vertical {"
+                              "    border: none;"
+                              "    background: #f1f1f1;"
+                              "    width: 10px;"
+                              "    margin: 0px 0px 0px 0px;"
+                              "}"
+                              "QScrollBar::handle:vertical {"
+                              "    background: #d3d3d3;"
+                              "    min-height: 10px;"
+                              "    border-radius: 4px;"
+                              "}"
+                              "QScrollBar::add-line:vertical {"
+                              "    border: none;"
+                              "    background: none;"
+                              "}"
+                              "QScrollBar::sub-line:vertical {"
+                              "    border: none;"
+                              "    background: none;"
+                              "}");
+
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(scrollWidget);
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+
+    changeDirectoryButton = new QPushButton("Change Directory", this);
+    changeDirectoryButton->setFixedSize(130, 30);
+    changeDirectoryButton->setStyleSheet("QPushButton {"
+                                         "    background-color: #4CAF50;"
+                                         "    color: white;"
+                                         "    border: none;"
+                                         "    border-radius: 5px;"
+                                         "    font-size: 14px;"
+                                         "}"
+                                         "QPushButton:hover {"
+                                         "    background-color: #45a049;"
+                                         "}");
+    connect(changeDirectoryButton, &QPushButton::clicked, this, &Section0::changeDirectory);
+    mainLayout->addWidget(changeDirectoryButton);
+
+    QSpacerItem *topSpacer = new QSpacerItem(50, 50, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    mainLayout->addItem(topSpacer);
+
+    QLabel *instructionLabel = new QLabel("Selecciona configuración de guardado", this);
+    instructionLabel->setAlignment(Qt::AlignCenter);
+    instructionLabel->setStyleSheet("font-size: 20px; color: #333;");
+    mainLayout->addWidget(instructionLabel);
+
+    QSpacerItem *spacer = new QSpacerItem(30, 30, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    mainLayout->addItem(spacer);
+
+    mainLayout->addWidget(scrollArea);
+    setLayout(mainLayout);
 }
 
 void Section0::refreshConfigurations() {
@@ -26,7 +80,19 @@ void Section0::refreshConfigurations() {
 
     for (const QString &fileName : confFiles) {
         QPushButton *button = new QPushButton(fileName, this);
+        button->setFixedSize(200, 50);
         button->setProperty("isConfButton", true);
+        button->setStyleSheet("QPushButton {"
+                              "    background-color: #4CAF50;"
+                              "    color: white;"
+                              "    padding: 10px 24px;"
+                              "    border: none;"
+                              "    border-radius: 5px;"
+                              "    font-size: 14px;"
+                              "}"
+                              "QPushButton:hover {"
+                              "    background-color: #45a049;"
+                              "}");
         connect(button, &QPushButton::clicked, this, [this, fileName]() {
             onConfButtonClicked(fileName);
         });
@@ -43,39 +109,45 @@ void Section0::changeDirectory() {
 }
 
 void Section0::clearLayout(QLayout *layout) {
-    int itemCount = layout->count();
-    for (int i = itemCount - 1; i >= 0; --i) {
-        QLayoutItem *item = layout->takeAt(i);
-        QWidget *widget = item->widget();
-        if (widget && widget != changeDirectoryButton && widget->property("isConfButton").toBool()) {
-            delete widget;
+    QLayoutItem *child;
+    while ((child = layout->takeAt(0)) != nullptr) {
+        if (child->widget()) {
+            delete child->widget();
         }
-        delete item;
+        delete child;
     }
 }
 
 void Section0::onConfButtonClicked(const QString &fileName) {
     QString confFilePath = directoryPath + "/" + fileName;
     copyConfiguration(confFilePath);
-    QMessageBox::information(this, "Success", "Configuration copied successfully.");
+    QMessageBox::information(this, "Success", "GCODE GENERATED.");
 }
 
 void Section0::copyConfiguration(const QString &confFilePath) {
     QFile confFile(confFilePath);
     if (!confFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        // Error al abrir el archivo .conf
         return;
     }
 
     QString sectionValuesFilePath = QCoreApplication::applicationDirPath() + "/section_values.txt";
     QFile sectionValuesFile(sectionValuesFilePath);
     if (!sectionValuesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        // Error al abrir o crear el archivo section_values.txt
         return;
     }
 
     QTextStream confStream(&confFile);
     QTextStream sectionValuesStream(&sectionValuesFile);
+
+    QProcess *process = new QProcess(this);
+    QString currentPath = QDir::currentPath();
+    QString pythonScriptPath = currentPath + "/axolotl_1mat.py";
+    process->start("py", QStringList() << pythonScriptPath);
+    if (process->waitForStarted()) {
+        qDebug() << "Python script started successfully.";
+    } else {
+        qDebug() << "Failed to start Python script.";
+    }
 
     sectionValuesStream << confStream.readAll();
     sectionValuesStream << "\n\n";
@@ -83,4 +155,3 @@ void Section0::copyConfiguration(const QString &confFilePath) {
     sectionValuesFile.close();
     confFile.close();
 }
-

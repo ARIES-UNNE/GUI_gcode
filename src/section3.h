@@ -5,6 +5,12 @@
 #include <QSpinBox>
 #include <qlabel.h>
 #include <qcombobox.h>
+#include <QFormLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QSpinBox>
+#include <QLineEdit>
 
 class Section3 : public QWidget {
     Q_OBJECT
@@ -16,6 +22,9 @@ public:
     int getInfillValue() const;
     int getShapeIndex() const;
     double getStrandDistanceValue() const;
+
+signals:
+    void valueChanged();
 
 private:
     QSpinBox *infillSpinBox;

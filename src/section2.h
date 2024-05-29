@@ -5,6 +5,14 @@
 #include <QSpinBox>
 #include <qlabel.h>
 #include <qcombobox.h>
+#include <QFormLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QDoubleValidator>
+
 
 class Section2 : public QWidget {
     Q_OBJECT
@@ -19,13 +27,14 @@ public:
     int getShapeIndex1() const;
     int getShapeIndex2() const;
 
+signals:
+    void valueChanged();
 
 private:
     QLineEdit *sizeLineEdit;
     QLineEdit *sizeLineEdit2;
     QComboBox *shapeComboBox;
     QComboBox *shapeComboBox2;
-    QLabel *shapeLabel;
 };
 
 #endif // SECTION2_H
