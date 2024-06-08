@@ -19,47 +19,58 @@
 #include <qlabel.h>
 #include <QLineEdit>
 #include <qsizegrip.h>
-#include "section1.h"
-#include "section2.h"
-#include "section3.h"
+#include "DimensionSection.h"
+#include "ShapeSection.h"
+#include "InfillSection.h"
+#include "MaterialSection.h"
 #include "opengl.h"
-#include "section4.h"
 
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
+    // Constructor for the MainWindow class
     MainWindow(QWidget *parent = nullptr);
 
 private:
+    // Pointer to the central widget
     QWidget *centralWidget;
+    // Pointer to the QStackedWidget that manages different sections
     QStackedWidget *stackedWidget;
-    QPushButton *generateButton;
-    QPushButton *showValuesButton;
+    // Pointer to the OpenGL widget
+    OpenGLWidget *openGLWidget;
 
+    // Pointers to the buttons in the main window
+    QPushButton *generateButton;
     QPushButton *cancelButton;
     QPushButton *prevButton;
     QPushButton *nextButton;
-    OpenGLWidget *openGLWidget;
 
+    // Vertical layout to center the button
     QVBoxLayout *centeredButtonLayout;
 
+    // Method to apply styles to the widgets
     void applyStyles();
 
-    bool saveConfigurationToFile(const QString &fileName, Section1 *section1Widget, Section2 *section2Widget, Section3 *section3Widget, Section4 *section4Widget);
+    // Method to write configuration to a file
+    bool writeConfigurationToFile(const QString &fileName, DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
 
 private slots:
+    // Funtons to move arround the sections
     void nextSection();
     void previousSection();
-    void adjustSectionSize(int sectionIndex);
     void cancelConfirmation();
-    void showSectionValues(Section1 *section1Widget, Section2 *section2Widget,  Section3 *section3Widget, Section4 *section4Widget);
-    void RealTimeGCODE(Section1 *section1Widget, Section2 *section2Widget,  Section3 *section3Widget, Section4 *section4Widget);
+
+    // Method to adjust the section configuration
+    void sectionConfiguration(int sectionIndex);
+
+    // Method to save the configuration to a file
+    void saveConfigurationToFile(DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
+    // Method to update the GCODE in real-time
+    void RealTimeGCODE(DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
+    // Method to execute a Python script
     void executePython();
-
-
-
 };
 
 #endif // MAINWINDOW_H

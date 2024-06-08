@@ -21,18 +21,18 @@ set(PROJECT_SOURCES
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
-    section0.h
-    section0.cpp
-    section1.h
-    section1.cpp
-    section2.h
-    section2.cpp
-    section3.h
-    section3.cpp
-    section4.h
-    section4.cpp
-    section5.h
-    section5.cpp
+    SaveSection.h
+    SaveSection.cpp
+    DimensionSection.h
+    DimensionSection.cpp
+    ShapeSection.h
+    ShapeSection.cpp
+    InfillSection.h
+    InfillSection.cpp
+    MaterialSection.h
+    MaterialSection.cpp
+    GenerateSection.h
+    GenerateSection.cpp
     opengl.h
     opengl.cpp
 )
