@@ -4,7 +4,7 @@ ShapeSection::ShapeSection(QWidget *parent) : QWidget(parent) {
     // Create a main widget for the section
     QWidget *ShapeSectionWidget = new QWidget(this);
 
-    QLabel *sectionTitle = new QLabel("Shape Configuration", this);
+    sectionTitle = new QLabel(tr("Shape Configuration"), this);
     sectionTitle->setObjectName("sectionTitle");
 
     // Set uniform size for widgets
@@ -12,18 +12,25 @@ ShapeSection::ShapeSection(QWidget *parent) : QWidget(parent) {
 
     // Initialize combo boxes for shape selection
     shapeComboBox = new QComboBox(this);
-    shapeComboBox->setPlaceholderText("Select a Shape");
-    shapeComboBox->addItem("Circle");
-    shapeComboBox->addItem("Square");
+    shapeComboBox->setPlaceholderText(tr("Select a Shape"));
+    shapeComboBox->addItem(tr("Circle"));
+    shapeComboBox->addItem(tr("Square"));
 
     shapeComboBox2 = new QComboBox(this);
-    shapeComboBox2->setPlaceholderText("Select a Size");
-    shapeComboBox2->addItem("Number of Layers");
-    shapeComboBox2->addItem("Height in mm");
+    shapeComboBox2->setPlaceholderText(tr("Select a Size"));
+    shapeComboBox2->addItem(tr("Number of Layers"));
+    shapeComboBox2->addItem(tr("Height in mm"));
 
     // Initialize labels
-    QLabel *shapeLabel = new QLabel("Shape Type", this);
-    QLabel *sizeLabel = new QLabel("Size Type", this);
+    shapeLabel = new QLabel(tr("Shape Type"), this);
+    sizeLabel = new QLabel(tr("Size Type"), this);
+
+    // Initialize line edits for size input
+    sizeLineEdit = new QLineEdit(this);
+    sizeLineEdit->setPlaceholderText(tr("Enter size in mm"));
+
+    sizeLineEdit2 = new QLineEdit(this);
+    sizeLineEdit2->setPlaceholderText(tr("Enter"));
 
     // Set size and alignment for labels
     shapeLabel->setMinimumWidth(uniformSize);
@@ -38,13 +45,6 @@ ShapeSection::ShapeSection(QWidget *parent) : QWidget(parent) {
     shapeComboBox->setMaximumWidth(uniformSize);
     shapeComboBox2->setMinimumWidth(uniformSize);
     shapeComboBox2->setMaximumWidth(uniformSize);
-
-    // Initialize line edits for size input
-    sizeLineEdit = new QLineEdit(this);
-    sizeLineEdit->setPlaceholderText("Enter size in mm");
-
-    sizeLineEdit2 = new QLineEdit(this);
-    sizeLineEdit2->setPlaceholderText("Enter");
 
     // Line edits configuration
     sizeLineEdit2->setVisible(false);
@@ -121,24 +121,38 @@ ShapeSection::ShapeSection(QWidget *parent) : QWidget(parent) {
     setLayout(mainLayout);
 
     // Apply styles
-    applyStyles();
+    applyStyles(false);
+}
+
+void ShapeSection::retranslateUi() {
+    sectionTitle->setText(tr("Shape Configuration"));
+    shapeLabel->setText(tr("Shape Type"));
+    sizeLabel->setText(tr("Size Type"));
+    shapeComboBox->setItemText(0, tr("Circle"));
+    shapeComboBox->setItemText(1, tr("Square"));
+    shapeComboBox2->setItemText(0, tr("Number of Layers"));
+    shapeComboBox2->setItemText(1, tr("Height in mm"));
+    shapeComboBox->setPlaceholderText(tr("Select a Shape"));
+    shapeComboBox2->setPlaceholderText(tr("Select a Size"));
+    sizeLineEdit->setPlaceholderText(tr("Enter size in mm"));
+    sizeLineEdit2->setPlaceholderText(tr("Enter"));
 }
 
 // Slot to handle shape selection changes
 void ShapeSection::handleShapeSelection(int index) {
     // Show or hide size line edit based on selected shape
-    bool showSizeLineEdit = (shapeComboBox->currentText() == "Square" || shapeComboBox->currentText() == "Circle");
+    bool showSizeLineEdit = (shapeComboBox->currentText() == tr("Square") || shapeComboBox->currentText() == tr("Circle"));
     sizeLineEdit->setVisible(showSizeLineEdit);
 
     // Show or hide additional size line edit based on second combo box selection
-    bool showSizeLineEdit2 = (shapeComboBox2->currentText() == "Number of Layers" || shapeComboBox2->currentText() == "Height in mm");
+    bool showSizeLineEdit2 = (shapeComboBox2->currentText() == tr("Number of Layers") || shapeComboBox2->currentText() == tr("Height in mm"));
     sizeLineEdit2->setVisible(showSizeLineEdit2);
 
     // Update placeholder text based on selected shape
-    if (shapeComboBox->currentText() == "Square") {
-        sizeLineEdit->setPlaceholderText("Side in mm");
-    } else if (shapeComboBox->currentText() == "Circle") {
-        sizeLineEdit->setPlaceholderText("Diameter in mm");
+    if (shapeComboBox->currentText() == tr("Square")) {
+        sizeLineEdit->setPlaceholderText(tr("Side in mm"));
+    } else if (shapeComboBox->currentText() == tr("Circle")) {
+        sizeLineEdit->setPlaceholderText(tr("Diameter in mm"));
     }
 }
 
@@ -163,51 +177,93 @@ int ShapeSection::getShapeIndex2() const {
 }
 
 // Apply styles to the section
-void ShapeSection::applyStyles() {
-    setStyleSheet(
-        "QPushButton {"
-        "    background-color: #4CAF50;"
-        "    color: #333;"
-        "    border: none;"
-        "    border-radius: 5px;"
-        "    font-size: 14px;"
-        "    padding: 5px 10px;"
-        "}"
-        "QPushButton:hover {"
-        "    background-color: #45a049;"
-        "    color: white;"
-        "}"
-        "QLineEdit {"
-        "    border: 1px solid #ddd;"
-        "    border-radius: 3px;"
-        "    padding: 5px;"
-        "    font-size: 14px;"
-        "}"
-        "QComboBox {"
-        "    border: 1px solid #ddd;"
-        "    border-radius: 3px;"
-        "    padding: 5px;"
-        "    font-size: 14px;"
-        "}"
-        "QComboBox QAbstractItemView {"
-        "    border: 1px solid #ddd;"
-        "    selection-background-color: #4CAF50;"
-        "    selection-color: white;"
-        "}"
-        "QWidget {"
-        "    background-color: #f9f9f9;"
-        "    padding: 10px;"
-        "    border: 1px solid #ccc;"
-        "    font-size: 14px;"
-        "    border-radius: 10px;"
-        "    font-size: 14px;"
-        "}"
-        "QLabel#sectionTitle {"
-        "    font-size: 20px;"
-        "    color: #4CAF50;"
-        "    font-weight: bold;"
-        "    border: 1px solid #ccc;"
-        "    padding: 10px 5px;"
-        "}"
-        );
+void ShapeSection::applyStyles(bool darkMode) {
+    if (darkMode) {
+        setStyleSheet(
+            "QPushButton {"
+            "    background-color: #555555;"
+            "    color: white;"
+            "    border: none;"
+            "    border-radius: 5px;"
+            "    font-size: 14px;"
+            "    padding: 5px 10px;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #666666;"
+            "}"
+            "QLineEdit {"
+            "    border: 1px solid #555555;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "    background-color: #333333;"
+            "    color: white;"
+            "}"
+            "QComboBox {"
+            "    border: 1px solid #555555;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "    background-color: #333333;"
+            "    color: white;"
+            "}"
+            "QWidget {"
+            "    background-color: #212121;"
+            "    padding: 10px;"
+            "    border: 1px solid #555555;"
+            "    font-size: 14px;"
+            "    border-radius: 10px;"
+            "    color: white;"
+            "}"
+            "QLabel#sectionTitle {"
+            "    font-size: 20px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    border: 1px solid #555555;"
+            "    padding: 10px 5px;"
+            "    background-color: #212121;"
+            "}"
+            );
+    } else {
+        setStyleSheet(
+            "QPushButton {"
+            "    background-color: #4CAF50;"
+            "    color: #333;"
+            "    border: none;"
+            "    border-radius: 5px;"
+            "    font-size: 14px;"
+            "    padding: 5px 10px;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #45a049;"
+            "    color: white;"
+            "}"
+            "QLineEdit {"
+            "    border: 1px solid #ddd;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "}"
+            "QComboBox {"
+            "    border: 1px solid #ddd;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "}"
+            "QWidget {"
+            "    background-color: #f9f9f9;"
+            "    padding: 10px;"
+            "    border: 1px solid #ccc;"
+            "    font-size: 14px;"
+            "    border-radius: 10px;"
+            "}"
+            "QLabel#sectionTitle {"
+            "    font-size: 20px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    border: 1px solid #ccc;"
+            "    padding: 10px 5px;"
+            "}"
+            );
+    }
 }

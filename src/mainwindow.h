@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QProcess>
 #include <QDebug>
+#include <QTranslator>
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QFormLayout>
@@ -33,6 +34,8 @@ public:
     // Constructor for the MainWindow class
     MainWindow(QWidget *parent = nullptr);
 
+    void applyStyles(bool darkMode);
+
 private:
     // Pointer to the central widget
     QWidget *centralWidget;
@@ -42,35 +45,48 @@ private:
     OpenGLWidget *openGLWidget;
 
     // Pointers to the buttons in the main window
-    QPushButton *generateButton;
     QPushButton *cancelButton;
     QPushButton *prevButton;
+    QTranslator translator;
     QPushButton *nextButton;
+    QPushButton *toggleDarkModeButton;
 
-    // Vertical layout to center the button
-    QVBoxLayout *centeredButtonLayout;
+    void applyDarkMode();
+    void applyLightMode();
 
-    // Method to apply styles to the widgets
-    void applyStyles();
+    void retranslateUi();
+    void retranslateSection(QWidget* section);
+
+    bool darkModeEnabled;
+
+
+
 
     // Method to write configuration to a file
     bool writeConfigurationToFile(const QString &fileName, DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
 
 private slots:
-    // Funtons to move arround the sections
+    // Slot to move to the next section
     void nextSection();
+    // Slot to move to the previous section
     void previousSection();
+    // Slot to show a cancellation confirmation dialog
     void cancelConfirmation();
-
-    // Method to adjust the section configuration
+    void toggleDarkMode();
+    // Slot to adjust the section configuration
     void sectionConfiguration(int sectionIndex);
 
-    // Method to save the configuration to a file
+    // Slot to save the configuration to a file
     void saveConfigurationToFile(DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
-    // Method to update the GCODE in real-time
+    // Slot to update the GCODE in real-time
     void RealTimeGCODE(DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
-    // Method to execute a Python script
+    // Slot to execute a Python script
     void executePython();
+
+    void changeLanguage(const QString &languageCode);
+
+
+
 };
 
 #endif // MAINWINDOW_H

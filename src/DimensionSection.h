@@ -42,8 +42,19 @@ private:
     QSpinBox *centerXSpinBox;
     QSpinBox *centerYSpinBox;
 
+    // declaration for translating
+    QLabel *sectionTitle;
+    QLabel *labelTitle;
+    QPushButton *manualCenterButton;
+
     // styles
     void applyStyles();
+
+public slots:
+
+    // Trasnlation
+    void retranslateUi();
+    void applyStyles(bool darkMode);
 
 };
 

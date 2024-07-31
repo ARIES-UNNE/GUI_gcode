@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(TFGproyecto VERSION 0.1 LANGUAGES CXX)
+project(TFGlenguage VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -10,10 +10,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Encontrar los paquetes necesarios de Qt y OpenGL
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets OpenGLWidgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets OpenGLWidgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets OpenGLWidgets LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets OpenGLWidgets LinguistTools)
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
+
+# Archivos de traducción
+set(TS_FILES translations/myapp_en.ts translations/myapp_es.ts)
 
 # Archivos fuente y encabezados
 set(PROJECT_SOURCES
@@ -35,38 +38,38 @@ set(PROJECT_SOURCES
     GenerateSection.cpp
     opengl.h
     opengl.cpp
+    startpage.h
+    startpage.cpp
 )
 
 # Añadir ejecutable según la versión de Qt
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(TFGproyecto
+    qt_add_executable(TFGlenguage
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        startpage.h startpage.cpp
-
     )
 else()
     if(ANDROID)
-        add_library(TFGproyecto SHARED
+        add_library(TFGlenguage SHARED
             ${PROJECT_SOURCES}
         )
     else()
-        add_executable(TFGproyecto
+        add_executable(TFGlenguage
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
 # Enlazar bibliotecas Qt y OpenGL
-target_link_libraries(TFGproyecto PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(TFGproyecto PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-target_link_libraries(TFGproyecto PRIVATE ${OPENGL_gl_LIBRARY})
+target_link_libraries(TFGlenguage PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(TFGlenguage PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+target_link_libraries(TFGlenguage PRIVATE ${OPENGL_gl_LIBRARY})
 
 # Propiedades del ejecutable para macOS/iOS
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.TFGproyecto)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.TFGlenguage)
 endif()
-set_target_properties(TFGproyecto PROPERTIES
+set_target_properties(TFGlenguage PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -76,7 +79,7 @@ set_target_properties(TFGproyecto PROPERTIES
 
 # Incluir y configurar la instalación
 include(GNUInstallDirs)
-install(TARGETS TFGproyecto
+install(TARGETS TFGlenguage
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -84,5 +87,5 @@ install(TARGETS TFGproyecto
 
 # Finalizar el ejecutable para Qt 6
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(TFGproyecto)
+    qt_finalize_executable(TFGlenguage)
 endif()

@@ -6,27 +6,32 @@
 #include "infillSection.h"
 #include "materialSection.h"
 #include "GenerateSection.h"
+#include <QFile>
+#include <QAction>
+#include <QMenuBar>
+#include <QApplication>
 
-// MainWindow constructor
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(false) {
     // Create a central widget for the main window
-    centralWidget = new QWidget(this);
+    QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
 
     // Set size for all app
-    setFixedSize(600, 600);
-
+    setFixedSize(700, 600);
+    darkModeEnabled = true;
     // Create the main horizontal layout
     QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
+
+    // Create layout for sections and buttons
+    QVBoxLayout *sectionsLayout = new QVBoxLayout();
 
     // Start section
     SectionStart *sectionStartWidget = new SectionStart(this);
     connect(sectionStartWidget, &SectionStart::startButtonClicked, this, [this]() {
         nextSection();  // Move to the next section
     });
-
-    // Create layout for sections and buttons
-    QVBoxLayout *sectionsLayout = new QVBoxLayout();
+    connect(sectionStartWidget, &SectionStart::languageChanged, this, &MainWindow::changeLanguage);
 
     // Section 0: Save configuration
     SaveSection *SaveSectionWidget = new SaveSection(this);
@@ -61,19 +66,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Add sectionsLayout to the main layout
     mainLayout->addLayout(sectionsLayout);
 
-    //START BUTTONS
+    // START BUTTONS
     // Create horizontal layout for buttons
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
 
     // Spacer to align buttons
     buttonsLayout->addItem(new QSpacerItem(9, 0, QSizePolicy::Minimum));
     // Create button to go to the previous section
-    prevButton = new QPushButton("Previous", this);
+    prevButton = new QPushButton(tr("Previous"), this);
     connect(prevButton, &QPushButton::clicked, this, &MainWindow::previousSection);
     buttonsLayout->addWidget(prevButton);
 
     // Create button to go to the next section
-    nextButton = new QPushButton("Next", this);
+    nextButton = new QPushButton(tr("Next"), this);
     connect(nextButton, &QPushButton::clicked, this, [this, DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget]() {
         nextSection();
         // Update 3D visualicer on next-section action
@@ -81,21 +86,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
     buttonsLayout->addWidget(nextButton);
 
-    // Create button to generate GCODE
-    generateButton = new QPushButton("GENERATE GCODE", this);
-    connect(generateButton, &QPushButton::clicked, this, [DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget, this]() {
+    // Create connection to generate GCODE
+    connect(GenerateSectionWidget, &GenerateSection::generateGcode, this, [this, DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget]() {
         saveConfigurationToFile(DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget);
     });
 
-    // Layout to center the generate button
-    centeredButtonLayout = new QVBoxLayout();
-    QHBoxLayout *hCenterLayout = new QHBoxLayout();
-    hCenterLayout->addWidget(generateButton);
-    centeredButtonLayout->addLayout(hCenterLayout);
-    sectionsLayout->addLayout(centeredButtonLayout);
+
+    // Create button to toggle dark mode
+    toggleDarkModeButton = new QPushButton(tr("Light Mode"), this);
+    connect(toggleDarkModeButton, &QPushButton::clicked, this, &MainWindow::toggleDarkMode);
+    buttonsLayout->addWidget(toggleDarkModeButton);
 
     // Create cancel button
-    cancelButton = new QPushButton("Cancel", this);
+    cancelButton = new QPushButton(tr("Cancel"), this);
     connect(cancelButton, &QPushButton::clicked, this, &MainWindow::cancelConfirmation);
     buttonsLayout->addWidget(cancelButton);
 
@@ -106,12 +109,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     prevButton->setFixedSize(80, 30);
     nextButton->setFixedSize(80, 30);
     cancelButton->setFixedSize(80, 30);
-    generateButton->setFixedSize(200, 50);
+    toggleDarkModeButton->setFixedSize(80, 30);
     buttonsLayout->setAlignment(cancelButton, Qt::AlignRight);
 
     sectionsLayout->addLayout(buttonsLayout);
-    //END BUTTONS
-
+    // END BUTTONS
 
     // Create a container for the OpenGL widget with rounded corners
     QWidget *openGLContainer = new QWidget(this);
@@ -138,30 +140,120 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
 
     // Initially hide the buttons and OpenGL widget
-    generateButton->setVisible(false);
     nextButton->setVisible(false);
     prevButton->setVisible(false);
-    generateButton->setVisible(false);
     cancelButton->setVisible(false);
     openGLWidget->setVisible(false);
 
-    // Apply styles
-    applyStyles();
+    // Apply initial styles
+    applyStyles(darkModeEnabled);
 }
 
-// Apply CSS styles to the widgets
-void MainWindow::applyStyles() {
+void MainWindow::changeLanguage(const QString &languageCode) {
+    QString qmPath = QCoreApplication::applicationDirPath() + "/translations/myapp_" + languageCode + ".qm";
+
+    if (translator.load(qmPath)) {
+        qApp->installTranslator(&translator);
+        retranslateUi();
+    } else {
+        qDebug() << "Failed to load translation file: " << qmPath;
+    }
+}
+
+void MainWindow::retranslateUi() {
+    // Reaplicar las traducciones a todos los widgets visibles
+    for (int i = 0; i < stackedWidget->count(); ++i) {
+        QWidget *widget = stackedWidget->widget(i);
+        retranslateSection(widget);
+    }
+
+    // Actualizar el texto de los botones
+    prevButton->setText(tr("Previous"));
+    nextButton->setText(tr("Next"));
+    cancelButton->setText(tr("Cancel"));
+    toggleDarkModeButton->setText(tr("Light Mode"));
+
+    // Actualizar el título de la ventana principal
+    setWindowTitle(tr("My Application"));
+}
+
+void MainWindow::retranslateSection(QWidget* section) {
+    if (auto* startPage = qobject_cast<SectionStart*>(section)) {
+        startPage->retranslateUi();
+    } else if (auto* saveSection = qobject_cast<SaveSection*>(section)) {
+        saveSection->retranslateUi();
+    } else if (auto* dimensionSection = qobject_cast<DimensionSection*>(section)) {
+        dimensionSection->retranslateUi();
+    } else if (auto* shapeSection = qobject_cast<ShapeSection*>(section)) {
+        shapeSection->retranslateUi();
+    } else if (auto* infillSection = qobject_cast<InfillSection*>(section)) {
+        infillSection->retranslateUi();
+    } else if (auto* materialSection = qobject_cast<MaterialSection*>(section)) {
+        materialSection->retranslateUi();
+    } else if (auto* generateSection = qobject_cast<GenerateSection*>(section)) {
+        generateSection->retranslateUi();
+    }
+}
+
+// Apply styles to the widgets based on the mode
+void MainWindow::applyStyles(bool darkMode) {
+    if (darkMode) {
+        applyDarkMode();
+    } else {
+        applyLightMode();
+    }
+
+    // Apply styles to sections
+    for (int i = 0; i < stackedWidget->count(); ++i) {
+        QWidget *widget = stackedWidget->widget(i);
+        if (auto* startPage = qobject_cast<SectionStart*>(widget)) {
+            startPage->applyStyles(darkMode);
+        } else if (auto* saveSection = qobject_cast<SaveSection*>(widget)) {
+            saveSection->applyStyles(darkMode);
+        } else if (auto* dimensionSection = qobject_cast<DimensionSection*>(widget)) {
+            dimensionSection->applyStyles(darkMode);
+        } else if (auto* shapeSection = qobject_cast<ShapeSection*>(widget)) {
+            shapeSection->applyStyles(darkMode);
+        } else if (auto* infillSection = qobject_cast<InfillSection*>(widget)) {
+            infillSection->applyStyles(darkMode);
+        } else if (auto* materialSection = qobject_cast<MaterialSection*>(widget)) {
+            materialSection->applyStyles(darkMode);
+        } else if (auto* generateSection = qobject_cast<GenerateSection*>(widget)) {
+            generateSection->applyStyles(darkMode);
+        }
+    }
+}
+
+// Apply light mode styles
+void MainWindow::applyLightMode() {
     setStyleSheet("MainWindow { background-color: #f0f0f0; }");
 
-    QString buttonStyle = "QPushButton { background-color: #4CAF50; color: white; border: none;"
-                          "border-radius: 5px; padding: 10px 24px; font-size: 14px; }"
-                          "QPushButton:hover { background-color: #45a049; border: 1px solid #4CAF50; }";
-    generateButton->setStyleSheet(buttonStyle);
-
-    QString navButtonStyle ="QPushButton:hover { background-color: #e6ffe6; border: 1px solid #4CAF50;border-radius: 5px; }";
+    QString navButtonStyle = "QPushButton {}"
+                             "QPushButton:hover { background-color: #e6ffe6; border: 1px solid #4CAF50;border-radius: 5px; }";
     prevButton->setStyleSheet(navButtonStyle);
     nextButton->setStyleSheet(navButtonStyle);
     cancelButton->setStyleSheet(navButtonStyle);
+    toggleDarkModeButton->setStyleSheet(navButtonStyle);
+}
+
+// Apply dark mode styles
+void MainWindow::applyDarkMode() {
+    setStyleSheet("MainWindow { background-color: #1a1a1a; }");
+
+    QString navButtonStyle = "QPushButton { background-color: #2a2a2a; color: white;"
+                             "border-radius: 5px; }"
+                             "QPushButton:hover { background-color: #001900; border: 1px solid #4CAF50; }";
+    prevButton->setStyleSheet(navButtonStyle);
+    nextButton->setStyleSheet(navButtonStyle);
+    cancelButton->setStyleSheet(navButtonStyle);
+    toggleDarkModeButton->setStyleSheet(navButtonStyle);
+}
+
+// Toggle dark mode
+void MainWindow::toggleDarkMode() {
+    darkModeEnabled = !darkModeEnabled;
+    applyStyles(darkModeEnabled);
+    toggleDarkModeButton->setText(darkModeEnabled ? tr("Light Mode") : tr("Dark Mode"));
 }
 
 // Configure the sections based on the index
@@ -170,40 +262,21 @@ void MainWindow::sectionConfiguration(int sectionIndex) {
     switch (sectionIndex) {
     case 1:
         setFixedSize(1200, 600);
-        generateButton->setVisible(false);
         nextButton->setVisible(true);
         prevButton->setVisible(true);
         cancelButton->setVisible(true);
         openGLWidget->setVisible(true);
+        toggleDarkModeButton->setVisible(false);
         break;
     case 2:
     case 3:
     case 4:
     case 5:
-        setFixedSize(1200, 600);
-        generateButton->setVisible(false);
-        break;
     case 6:
-        setFixedSize(1200, 600);
-        generateButton->setVisible(true);
-        // Add spacer for the last section (adjust postion of GenerateButton)
-        if (centeredButtonLayout->itemAt(centeredButtonLayout->count() - 1) == nullptr) {
-            centeredButtonLayout->addStretch();
-        }
-        centeredButtonLayout->addSpacing(150); // Spacer
-        break;
     default:
         break;
     }
 
-    // Remove the additional spacer in other sections (no longer needed)
-    if (sectionIndex != 6) {
-        QLayoutItem* item = centeredButtonLayout->itemAt(centeredButtonLayout->count() - 1);
-        if (item != nullptr && item->spacerItem() != nullptr) {
-            centeredButtonLayout->removeItem(item);
-            delete item;
-        }
-    }
 }
 
 
@@ -325,3 +398,4 @@ void MainWindow::RealTimeGCODE(DimensionSection *DimensionSectionWidget, ShapeSe
     writeConfigurationToFile("section_values.txt", DimensionSectionWidget, ShapeSectionWidget, InfillSectionWidget, MaterialSectionWidget);
     executePython();
 }
+

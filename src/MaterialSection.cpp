@@ -1,6 +1,5 @@
 #include "MaterialSection.h"
 
-
 // Constructor for the MaterialSection class
 MaterialSection::MaterialSection(QWidget *parent) : QWidget(parent) {
     // Create the main widget for the section
@@ -9,10 +8,11 @@ MaterialSection::MaterialSection(QWidget *parent) : QWidget(parent) {
 
     // Initialize the spin box to select the number of materials
     numMaterialsSpinBox = new QSpinBox(this);
+    numMaterialsSpinBox->setObjectName("numMaterialsSpinBox");
     numMaterialsSpinBox->setRange(0, 100);
 
     // Create a label for the number of materials
-    QLabel *sectionTitle = new QLabel("Number of Materials", this);
+    sectionTitle = new QLabel(tr("Number of Materials"), this);
     sectionTitle->setObjectName("plateSizeLabel4");
 
     // Create and set layout for the section
@@ -34,13 +34,18 @@ MaterialSection::MaterialSection(QWidget *parent) : QWidget(parent) {
 
     // Create a header container and layout for the material properties
     QWidget *headerContainer = new QWidget(this);
+    headerContainer->setObjectName("headerContainer");
     QHBoxLayout *headerLayout = new QHBoxLayout(headerContainer);
 
     // Header Labels
-    QLabel *headerLabel1 = new QLabel("Material", this);
-    QLabel *headerLabel2 = new QLabel("Nozzle", this);
-    QLabel *headerLabel3 = new QLabel("Filament mm", this);
-    QLabel *headerLabel4 = new QLabel("Additional Field", this);
+    headerLabel1 = new QLabel(tr("Material"), this);
+    headerLabel1->setObjectName("headerLabel");
+    headerLabel2 = new QLabel(tr("Nozzle"), this);
+    headerLabel2->setObjectName("headerLabel");
+    headerLabel3 = new QLabel(tr("Filament mm"), this);
+    headerLabel3->setObjectName("headerLabel");
+    headerLabel4 = new QLabel(tr("Additional Field"), this);
+    headerLabel4->setObjectName("headerLabel");
 
     // Add header labels to the layout
     headerLayout->addItem(new QSpacerItem(10, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
@@ -75,7 +80,15 @@ MaterialSection::MaterialSection(QWidget *parent) : QWidget(parent) {
     setLayout(mainLayout);
 
     // Apply styles
-    applyStyles();
+    applyStyles(false);
+}
+
+void MaterialSection::retranslateUi() {
+    sectionTitle->setText(tr("Number of Materials"));
+    headerLabel1->setText(tr("Material"));
+    headerLabel2->setText(tr("Nozzle"));
+    headerLabel3->setText(tr("Filament mm"));
+    headerLabel4->setText(tr("Additional Field"));
 }
 
 // Function to update the material configurations based on the input fields
@@ -129,14 +142,18 @@ void MaterialSection::updateMaterialNames(int numMaterials) {
         QHBoxLayout *materialRowLayout = new QHBoxLayout(materialRow);
 
         // Create and configure the material label, combo box, and line edits
-        QLabel *materialLabel = new QLabel("Material " + QString::number(i), this);
+        QLabel *materialLabel = new QLabel(tr("Material ") + QString::number(i), this);
+        materialLabel->setObjectName("materialLabel");
         QComboBox *nozzleComboBox = new QComboBox(this);
-        nozzleComboBox->addItem("0.2 mm");
-        nozzleComboBox->addItem("0.4 mm");
-        nozzleComboBox->addItem("0.6 mm");
+        nozzleComboBox->setObjectName("nozzleComboBox");
+        nozzleComboBox->addItem(tr("0.2 mm"));
+        nozzleComboBox->addItem(tr("0.4 mm"));
+        nozzleComboBox->addItem(tr("0.6 mm"));
         QLineEdit *filamentLineEdit = new QLineEdit(this);
+        filamentLineEdit->setObjectName("filamentLineEdit");
         filamentLineEdit->setValidator(new QDoubleValidator(this));
         QLineEdit *additionalLineEdit = new QLineEdit(this);
+        additionalLineEdit->setObjectName("additionalLineEdit");
         additionalLineEdit->setValidator(new QDoubleValidator(this));
 
         // Set the minimum and maximum width for the widgets
@@ -182,79 +199,163 @@ int MaterialSection::getNumMaterials() const {
 }
 
 // Apply styles to the section
-void MaterialSection::applyStyles() {
-    setStyleSheet(
-        "QLabel {"
-        "    font-size: 14px;"
-        "    color: #333;"
-        "}"
-        "QLabel#plateSizeLabel4 {"
-        "    font-size: 18px;"
-        "    color: #4CAF50;"
-        "    font-weight: bold;"
-        "    padding: 5px 0;"
-        "}"
-        "QPushButton {"
-        "    background-color: #4CAF50;"
-        "    color: #333;"
-        "    border: none;"
-        "    border-radius: 5px;"
-        "    font-size: 14px;"
-        "    padding: 5px 10px;"
-        "}"
-        "QPushButton:hover {"
-        "    background-color: #45a049;"
-        "    color: white;"
-        "}"
-        "QSpinBox, QComboBox, QLineEdit {"
-        "    border: 1px solid #ddd;"
-        "    border-radius: 3px;"
-        "    padding: 5px;"
-        "    font-size: 14px;"
-        "}"
-        "QSpinBox::up-button, QSpinBox::down-button {"
-        "    width: 0px;"
-        "}"
-        "QSpinBox::up-button:hover, QSpinBox::down-button:hover {"
-        "    background-color: #ddd;"
-        "}"
-        "QComboBox::drop-down {"
-        "    border: none;"
-        "}"
-        "QComboBox QAbstractItemView {"
-        "    border: 1px solid #ddd;"
-        "    selection-background-color: #4CAF50;"
-        "    selection-color: white;"
-        "}"
-        "QWidget#section4Widget {"
-        "    background-color: #f9f9f9;"
-        "    padding: 10px;"
-        "    border: 1px solid #ccc;"
-        "    border-radius: 10px;"
-        "}"
-        "QWidget#materialRowWidget {"
-        "    background-color: #ffffff;"
-        "    padding: 5px;"
-        "    border: 1px solid #ddd;"
-        "    border-radius: 5px;"
-        "}"
-        "QScrollArea#materialScrollArea {"
-        "    border: 1px solid #ccc;"
-        "    border-radius: 10px;"
-        "}"
-        "QScrollBar:vertical {"
-        "    border: none;"
-        "    background: #f1f1f1;"
-        "    width: 12px;"
-        "    margin: 1px 2px 1px 2px;"
-        "}"
-        "QScrollBar::handle:vertical {"
-        "    background: #d3d3d3;"
-        "    min-height: 10px;"
-        "    border-radius: 4px;"
-        "}"
-        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
-        "    height: 0px;"
-        "}"
-        );
+void MaterialSection::applyStyles(bool darkMode) {
+    if (darkMode) {
+        setStyleSheet(
+            "QLabel {"
+            "    font-size: 14px;"
+            "    color: white;"
+            "    background-color: #212121;"
+            "}"
+            "QLabel#plateSizeLabel4 {"
+            "    font-size: 18px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    padding: 5px 0;"
+            "    background-color: #212121;"
+            "}"
+            "QLabel#headerLabel {"
+            "    font-size: 14px;"
+            "    color: white;"
+            "    background-color: #212121;"
+            "}"
+            "QLabel#materialLabel {"
+            "    font-size: 14px;"
+            "    color: white;"
+            "    background-color: #212121;"
+            "}"
+            "QSpinBox#numMaterialsSpinBox, QComboBox#nozzleComboBox, QLineEdit#filamentLineEdit, QLineEdit#additionalLineEdit {"
+            "    border: 1px solid #555555;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "    background-color: #212121;"
+            "    color: white;"
+            "}"
+            "QSpinBox::up-button, QSpinBox::down-button {"
+            "    width: 0px;"
+            "}"
+            "QSpinBox::up-button:hover, QSpinBox::down-button:hover {"
+            "    background-color: #ddd;"
+            "}"
+            "QComboBox::drop-down {"
+            "    border: none;"
+            "}"
+            "QWidget#section4Widget {"
+            "    background-color: #212121;"
+            "    padding: 10px;"
+            "    border: 1px solid #555555;"
+            "    border-radius: 10px;"
+            "}"
+            "QWidget#materialRowWidget {"
+            "    background-color: #212121;"
+            "    padding: 5px;"
+            "    border: 1px solid #555555;"
+            "    border-radius: 5px;"
+            "}"
+            "QScrollArea#materialScrollArea {"
+            "    background-color: #1a1a1a;"
+            "    border: 1px solid #555555;"
+            "    border-radius: 5px;"
+            "}"
+            "QScrollBar:vertical {"
+            "    border: none;"
+            "    background: #1a1a1a;"
+            "    width: 12px;"
+            "    margin: 1px 2px 1px 2px;"
+            "}"
+            "QScrollBar::handle:vertical {"
+            "    background: #212121;"
+            "    min-height: 10px;"
+            "    border-radius: 4px;"
+            "}"
+            "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
+            "    height: 0px;"
+            "}"
+            "QWidget {"
+            "    background-color: #1a1a1a;"
+            "    color: white;"
+            "}"
+            "QWidget#headerContainer {"
+            "    background-color: #212121;"
+            "}"
+            );
+    } else {
+        setStyleSheet(
+            "QLabel {"
+            "    font-size: 14px;"
+            "    color: #333;"
+            "    background-color: transparent;"
+            "}"
+            "QLabel#plateSizeLabel4 {"
+            "    font-size: 18px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    padding: 5px 0;"
+            "    background-color: transparent;"
+            "}"
+            "QLabel#headerLabel {"
+            "    font-size: 14px;"
+            "    color: #333;"
+            "    background-color: transparent;"
+            "}"
+            "QLabel#materialLabel {"
+            "    font-size: 14px;"
+            "    color: #333;"
+            "    background-color: transparent;"
+            "}"
+            "QSpinBox#numMaterialsSpinBox, QComboBox#nozzleComboBox, QLineEdit#filamentLineEdit, QLineEdit#additionalLineEdit {"
+            "    border: 1px solid #ddd;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "    background-color: #ffffff;"
+            "    color: #333;"
+            "}"
+            "QSpinBox::up-button, QSpinBox::down-button {"
+            "    width: 0px;"
+            "}"
+            "QSpinBox::up-button:hover, QSpinBox::down-button:hover {"
+            "    background-color: #ddd;"
+            "}"
+            "QComboBox::drop-down {"
+            "    border: none;"
+            "}"
+            "QComboBox QAbstractItemView {"
+            "    border: 1px solid #ddd;"
+            "    selection-background-color: #4CAF50;"
+            "    selection-color: white;"
+            "}"
+            "QWidget#section4Widget {"
+            "    background-color: #f9f9f9;"
+            "    padding: 10px;"
+            "    border: 1px solid #ccc;"
+            "    border-radius: 10px;"
+            "}"
+            "QWidget#materialRowWidget {"
+            "    background-color: #ffffff;"
+            "    padding: 5px;"
+            "    border: 1px solid #ddd;"
+            "    border-radius: 5px;"
+            "}"
+            "QScrollArea#materialScrollArea {"
+            "    border: 1px solid #ccc;"
+            "    border-radius: 10px;"
+            "}"
+            "QScrollBar:vertical {"
+            "    border: none;"
+            "    background: #f1f1f1;"
+            "    width: 12px;"
+            "    margin: 1px 2px 1px 2px;"
+            "}"
+            "QScrollBar::handle:vertical {"
+            "    background: #d3d3d3;"
+            "    min-height: 10px;"
+            "    border-radius: 4px;"
+            "}"
+            "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
+            "    height: 0px;"
+            "}"
+            );
+    }
 }

@@ -1,12 +1,11 @@
 #include "InfillSection.h"
 
 InfillSection::InfillSection(QWidget *parent) : QWidget(parent) {
-
     // Create a main widget for the section
     QWidget *InfillSectionWidget = new QWidget(this);
     InfillSectionWidget->setObjectName("InfillSectionWidget");
 
-    QLabel *sectionTitle = new QLabel("Infill Configuration", this);
+    sectionTitle = new QLabel(tr("Infill Configuration"), this);
     sectionTitle->setObjectName("sectionTitle");
 
     // Set uniform size
@@ -18,21 +17,21 @@ InfillSection::InfillSection(QWidget *parent) : QWidget(parent) {
 
     strandDistanceLineEdit = new QLineEdit(this);
 
+    // Initialize combo box for method selection
+    shapeComboBox = new QComboBox(this);
+    shapeComboBox->setPlaceholderText(tr("Select"));
+    shapeComboBox->addItem(tr("Infill"));
+    shapeComboBox->addItem(tr("Strand Distance"));
+
+    // Initialize labels
+    title = new QLabel(tr("Method Selection"), this);
+    percentage = new QLabel("%: ", this);
+    millimeters = new QLabel("mm: ", this);
+
     // Create layout for the section
     QVBoxLayout *section3Layout = new QVBoxLayout(InfillSectionWidget);
     section3Layout->setAlignment(Qt::AlignTop | Qt::AlignCenter);
     InfillSectionWidget->setLayout(section3Layout);
-
-    // Initialize combo box for method selection
-    shapeComboBox = new QComboBox(this);
-    shapeComboBox->setPlaceholderText("Select");
-    shapeComboBox->addItem("Infill");
-    shapeComboBox->addItem("Strand Distance");
-
-    // Initialize labels
-    QLabel *title = new QLabel("Method Selection", this);
-    percentage = new QLabel("%: ", this);
-    millimeters = new QLabel("mm: ", this);
 
     // Size configuration
     shapeComboBox->setMinimumWidth(uniformSize);
@@ -82,6 +81,8 @@ InfillSection::InfillSection(QWidget *parent) : QWidget(parent) {
 
     // Connect signals and slots
     connect(shapeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InfillSection::handleMethodSelection);
+
+
     connect(infillSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &InfillSection::valueChanged);
     connect(strandDistanceLineEdit, &QLineEdit::textChanged, [this]() {
         emit valueChanged();
@@ -101,7 +102,15 @@ InfillSection::InfillSection(QWidget *parent) : QWidget(parent) {
     setLayout(mainLayout);
 
     // Apply styles
-    applyStyles();
+    applyStyles(false);
+}
+
+void InfillSection::retranslateUi() {
+    sectionTitle->setText(tr("Infill Configuration"));
+    title->setText(tr("Method Selection"));
+    shapeComboBox->setPlaceholderText(tr("Select"));
+    shapeComboBox->setItemText(0, tr("Infill"));
+    shapeComboBox->setItemText(1, tr("Strand Distance"));
 }
 
 // Slot to handle method selection changes
@@ -138,50 +147,105 @@ double InfillSection::getStrandDistanceValue() const {
 }
 
 // Apply styles to the section
-void InfillSection::applyStyles() {
-    setStyleSheet(
-        "QSpinBox, QLineEdit {"
-        "    border: 1px solid #ddd;"
-        "    border-radius: 3px;"
-        "    font-size: 14px;"
-        "}"
-        "QComboBox {"
-        "    border: 1px solid #ddd;"
-        "    border-radius: 3px;"
-        "    padding: 5px;"
-        "    font-size: 14px;"
-        "}"
-        "QComboBox QAbstractItemView {"
-        "    border: 1px solid #ddd;"
-        "    selection-background-color: #4CAF50;"
-        "    selection-color: white;"
-        "}"
-        "QWidget {"
-        "    background-color: #f9f9f9;"
-        "    padding: 10px;"
-        "    border: 1px solid #ccc;"
-        "    border-radius: 10px;"
-        "    font-size: 14px;"
-        "}"
-        "QSpinBox::up-button {"
-        "    width: 0px;"
-        "}"
-        "QSpinBox::down-button {"
-        "    width: 0px;"
-        "}"
-        "QWidget#InfillSectionWidget {"
-        "    background-color: #f9f9f9;"
-        "    padding: 10px;"
-        "    border: 1px solid #ccc;"
-        "    border-radius: 10px;"
-        "    font-size: 14px;"
-        "}"
-        "QLabel#sectionTitle {"
-        "    font-size: 20px;"
-        "    color: #4CAF50;"
-        "    font-weight: bold;"
-        "    border: 1px solid #ccc;"
-        "    padding: 10px 5px;"
-        "}"
+void InfillSection::applyStyles(bool darkMode) {
+    if (darkMode) {
+        setStyleSheet(
+            "QSpinBox, QLineEdit {"
+            "    border: 1px solid #555555;"
+            "    border-radius: 3px;"
+            "    font-size: 14px;"
+            "    background-color: #333333;"
+            "    color: white;"
+            "}"
+            "QComboBox {"
+            "    border: 1px solid #555555;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "    background-color: #333333;"
+            "    color: white;"
+            "}"
+            "QComboBox QAbstractItemView {"
+            "    border: 1px solid #555555;"
+            "    selection-background-color: #666666;"
+            "    selection-color: white;"
+            "}"
+            "QWidget {"
+            "    background-color: #212121;"
+            "    padding: 10px;"
+            "    border: 1px solid #555555;"
+            "    border-radius: 10px;"
+            "    font-size: 14px;"
+            "    color: white;"
+            "}"
+            "QSpinBox::up-button {"
+            "    width: 0px;"
+            "}"
+            "QSpinBox::down-button {"
+            "    width: 0px;"
+            "}"
+            "QWidget#InfillSectionWidget {"
+            "    background-color: #212121;"
+            "    padding: 10px;"
+            "    border: 1px solid #555555;"
+            "    border-radius: 10px;"
+            "    font-size: 14px;"
+            "}"
+            "QLabel#sectionTitle {"
+            "    font-size: 20px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    border: 1px solid #555555;"
+            "    padding: 10px 5px;"
+            "    background-color: #212121;"
+            "}"
         );
+    } else {
+        setStyleSheet(
+            "QSpinBox, QLineEdit {"
+            "    border: 1px solid #ddd;"
+            "    border-radius: 3px;"
+            "    font-size: 14px;"
+            "}"
+            "QComboBox {"
+            "    border: 1px solid #ddd;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "}"
+            "QComboBox QAbstractItemView {"
+            "    border: 1px solid #ddd;"
+            "    selection-background-color: #4CAF50;"
+            "    selection-color: white;"
+            "}"
+            "QWidget {"
+            "    background-color: #f9f9f9;"
+            "    padding: 10px;"
+            "    border: 1px solid #ccc;"
+            "    border-radius: 10px;"
+            "    font-size: 14px;"
+            "}"
+            "QSpinBox::up-button {"
+            "    width: 0px;"
+
+            "}"
+            "QSpinBox::down-button {"
+            "    width: 0px;"
+            "}"
+            "QWidget#InfillSectionWidget {"
+            "    background-color: #f9f9f9;"
+            "    padding: 10px;"
+            "    border: 1px solid #ccc;"
+            "    border-radius: 10px;"
+            "    font-size: 14px;"
+            "}"
+            "QLabel#sectionTitle {"
+            "    font-size: 20px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    border: 1px solid #ccc;"
+            "    padding: 10px 5px;"
+            "}"
+            );
+    }
 }

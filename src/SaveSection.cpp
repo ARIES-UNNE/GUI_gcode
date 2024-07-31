@@ -1,19 +1,14 @@
 #include "SaveSection.h"
 
 SaveSection::SaveSection(QWidget *parent) : QWidget(parent) {
-
     // Initialize the scroll area and the widget that will contain the layout
     QScrollArea *scrollArea = new QScrollArea(this);
-    QWidget *scrollWidget = new QWidget(this);
+    scrollWidget = new QWidget(this);
+    scrollWidget->setObjectName("scrollWidget");
 
     // Create a vertical layout for the scroll widget and align it to the top and center horizontally
     layout = new QVBoxLayout(scrollWidget);
     layout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-
-    // Set the initial directory path to the application directory
-    directoryPath = QCoreApplication::applicationDirPath();
-    // Create buttons
-    createConfigurations();
 
     // Configure the scroll area
     scrollArea->setMaximumSize(240, 400);
@@ -26,25 +21,31 @@ SaveSection::SaveSection(QWidget *parent) : QWidget(parent) {
     QHBoxLayout *scrollContainerLayout = new QHBoxLayout(scrollContainer);
     scrollContainerLayout->addWidget(scrollArea);
 
-    // Create the main layout for the section
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+
+    // Set the initial directory path to the application directory
+    directoryPath = QCoreApplication::applicationDirPath();
 
     // Create and configure the change directory button
-    changeDirectoryButton = new QPushButton("Change Directory", this);
-    changeDirectoryButton->setFixedSize(130, 30);
+    changeDirectoryButton = new QPushButton(tr("Change Directory"), this);
+    changeDirectoryButton->setFixedSize(140, 30);
     connect(changeDirectoryButton, &QPushButton::clicked, this, &SaveSection::changeDirectory);
 
     // Add the change directory button to the main layout aligned to the left
     QHBoxLayout *buttonLayout = new QHBoxLayout();
     buttonLayout->addWidget(changeDirectoryButton, 0, Qt::AlignLeft);
+
+    // Create the main layout for the section
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+
     mainLayout->addLayout(buttonLayout);
 
+    //LABEL
     // Add spacers on top of instruction text
     QSpacerItem *topSpacer = new QSpacerItem(50, 50, QSizePolicy::Minimum, QSizePolicy::Expanding);
     mainLayout->addItem(topSpacer);
 
     // Instruction text and configuration
-    QLabel *instructionLabel = new QLabel("Select Save Configuration", this);
+    instructionLabel = new QLabel(tr("Select Save Configuration"), this);
     instructionLabel->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(instructionLabel);
 
@@ -55,52 +56,104 @@ SaveSection::SaveSection(QWidget *parent) : QWidget(parent) {
     mainLayout->addWidget(scrollContainer);
     setLayout(mainLayout);
 
+    // Create buttons
+    createConfigurations();
+
     // Apply styles
-    applyStyles();
+    applyStyles(false);
 }
 
-// Applies styles to the widgets in the section
-void SaveSection::applyStyles() {
-    setStyleSheet(
-        "QScrollArea {"
-        "    border: 0px solid #4CAF50;"
-        "    border-radius: 5px;"
-        "    background: #f9f9f9;"
-        "}"
-        "QScrollBar:vertical {"
-        "    border: none;"
-        "    background: #f1f1f1;"
-        "    width: 10px;"
-        "    margin: 0px 0px 0px 0px;"
-        "}"
-        "QScrollBar::handle:vertical {"
-        "    background: #d3d3d3;"
-        "    min-height: 10px;"
-        "    border-radius: 4px;"
-        "}"
-        "QScrollBar::add-line:vertical {"
-        "    border: none;"
-        "    background: none;"
-        "}"
-        "QScrollBar::sub-line:vertical {"
-        "    border: none;"
-        "    background: none;"
-        "}"
-        "QPushButton {"
-        "    background-color: #4CAF50;"
-        "    color: white;"
-        "    border: none;"
-        "    border-radius: 5px;"
-        "    font-size: 14px;"
-        "}"
-        "QPushButton:hover {"
-        "    background-color: #45a049;"
-        "}"
-        "QLabel {"
-        "    font-size: 20px;"
-        "    color: #333;"
-        "}"
-        );
+void SaveSection::retranslateUi() {
+    changeDirectoryButton->setText(tr("Change Directory"));
+    instructionLabel->setText(tr("Select Save Configuration"));
+}
+
+// Aplica estilos a los widgets de la sección
+void SaveSection::applyStyles(bool darkMode) {
+    if (darkMode) {
+        setStyleSheet(
+            "QScrollArea {"
+            "    border: 0px solid #4CAF50;"
+            "    border-radius: 5px;"
+            "}"
+            "QScrollBar:vertical {"
+            "    border: none;"
+            "    background: #3d3d3d;"
+            "    width: 10px;"
+            "    margin: 0px 0px 0px 0px;"
+            "}"
+            "QScrollBar::handle:vertical {"
+            "    background: #555555;"
+            "    min-height: 10px;"
+            "    border-radius: 4px;"
+            "}"
+            "QScrollBar::add-line:vertical {"
+            "    border: none;"
+            "    background: none;"
+            "}"
+            "QScrollBar::sub-line:vertical {"
+            "    border: none;"
+            "    background: none;"
+            "}"
+            "QPushButton {"
+            "    background-color: #2a2a2a;"
+            "    color: white;"
+            "    border: none;"
+            "    border-radius: 5px;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #001900;"
+            "    border: 1px solid #4CAF50;"
+            "    border-radius: 5px;"
+            "}"
+            "QLabel {"
+            "    font-size: 20px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    padding: 10px 5px;"
+            "}"
+            "QWidget#scrollWidget {"
+            "    background-color: #1a1a1a;"
+            "}"
+            );
+    } else {
+        setStyleSheet(
+            "QScrollArea {"
+            "    border: 0px solid #4CAF50;"
+            "    border-radius: 5px;"
+            "}"
+            "QScrollBar:vertical {"
+            "    border: none;"
+            "    background: #f1f1f1;"
+            "    width: 10px;"
+            "    margin: 0px 0px 0px 0px;"
+            "}"
+            "QScrollBar::handle:vertical {"
+            "    background: #d3d3d3;"
+            "    min-height: 10px;"
+            "    border-radius: 4px;"
+            "}"
+            "QScrollBar::add-line:vertical {"
+            "    border: none;"
+            "    background: none;"
+            "}"
+            "QScrollBar::sub-line:vertical {"
+            "    border: none;"
+            "    background: none;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #e6ffe6;"
+            "    border: 1px solid #4CAF50;"
+            "    border-radius: 5px;"
+            "}"
+            "QLabel{"
+            "    font-size: 20px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    padding: 10px 5px;"
+            "}"
+            );
+    }
 }
 
 // Creates and refreshes the list of configuration files in the current directory
@@ -127,14 +180,13 @@ void SaveSection::createConfigurations() {
         layout->addWidget(button);
     }
 
-    applyStyles();
+    applyStyles(false);
 }
-
 
 // Changes the directory to a new path selected by the user
 void SaveSection::changeDirectory() {
     // Open a file dialog to select a new directory
-    QString newDirectory = QFileDialog::getExistingDirectory(this, "Select Directory", directoryPath);
+    QString newDirectory = QFileDialog::getExistingDirectory(this, tr("Select Directory"), directoryPath);
     // If a new directory is selected, update the directory path and refresh the configurations
     if (!newDirectory.isEmpty()) {
         directoryPath = newDirectory;
@@ -152,13 +204,12 @@ void SaveSection::clearLayout(QLayout *layout) {
         delete child;
     }
 }
-
 // Mesagge called when a configuration button is clicked
 void SaveSection::onConfButtonClicked(const QString &fileName) {
     QString confFilePath = directoryPath + "/" + fileName;
     // Copy the configuration file to the application's directory
     copyConfiguration(confFilePath);
-    QMessageBox::information(this, "Success", "GCODE GENERATED.");
+    QMessageBox::information(this, tr("Success"), tr("GCODE GENERATED."));
 }
 
 // Copies the selected configuration file "section_values.txt"

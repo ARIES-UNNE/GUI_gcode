@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 
 // The GenerateSection class for the fibak generation section of the UI
 class GenerateSection : public QWidget
@@ -15,6 +16,15 @@ public:
     explicit GenerateSection(QWidget *parent = nullptr);
 
 private:
+    QLabel *completionLabel;
+    QPushButton *generateButton;
+
+signals:
+    void generateGcode();
+
+public slots:
+    void retranslateUi();
+    void applyStyles(bool darkMode);
 
 };
 

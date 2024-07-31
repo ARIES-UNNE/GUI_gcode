@@ -26,9 +26,11 @@ private:
 
     // Layout to arrange widgets vertically
     QVBoxLayout *layout;
-
+    QLabel *instructionLabel;
     QPushButton *changeDirectoryButton; // Button to change the directory
     QString directoryPath; // Path to the current directory
+    QWidget *scrollWidget;
+
 
     // create the list of configuration files in the current directory
     void createConfigurations();
@@ -37,7 +39,6 @@ private:
     void clearLayout(QLayout *layout);
 
     //  Styles
-    void applyStyles();
 
 signals:
     // Signal emitted to load a configuration file
@@ -53,6 +54,8 @@ private slots:
 public slots:
     // Copies the selected configuration file to the application's directory
     void copyConfiguration(const QString &confFilePath);
+    void retranslateUi();
+    void applyStyles(bool darkMode);
 };
 
 #endif // SAVESECTION_H

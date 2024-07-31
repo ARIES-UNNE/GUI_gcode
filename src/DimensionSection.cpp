@@ -4,7 +4,7 @@ DimensionSection::DimensionSection(QWidget *parent) : QWidget(parent) {
 
     QWidget *dimensionSectionWidget = new QWidget(this);
 
-    QLabel *sectionTitle = new QLabel("Dimension Configuration", this);
+    sectionTitle = new QLabel(tr("Dimension Configuration"), this);
     sectionTitle->setObjectName("sectionTitle");
 
     // Initialize spin boxes
@@ -13,12 +13,18 @@ DimensionSection::DimensionSection(QWidget *parent) : QWidget(parent) {
     centerXSpinBox = new QSpinBox(this);
     centerYSpinBox = new QSpinBox(this);
 
+    centerXSpinBox->setRange(-150, 150);
+    centerYSpinBox->setRange(-150, 150);
 
     // Create labels
     QLabel *labelX = new QLabel("X:", this);
     QLabel *labelY = new QLabel("Y:", this);
-    QLabel *labelTitle = new QLabel("Introduce Plate Size:", this);
+    labelTitle = new QLabel(tr("Introduce Plate Size:"), this);
     labelTitle->setAlignment(Qt::AlignCenter);
+
+    // Create labels for center coordinates
+    QLabel *labelCenterX = new QLabel("X:", this);
+    QLabel *labelCenterY = new QLabel("Y:", this);
 
     // Create and set layout for the section
     QVBoxLayout *sectionLayout = new QVBoxLayout(dimensionSectionWidget);
@@ -45,16 +51,6 @@ DimensionSection::DimensionSection(QWidget *parent) : QWidget(parent) {
     sectionLayout->addLayout(horizontalLayoutX);
     sectionLayout->addLayout(horizontalLayoutY);
 
-    // Create labels for center coordinates
-    QLabel *labelCenterX = new QLabel("X:", this);
-    QLabel *labelCenterY = new QLabel("Y:", this);
-
-    // Initially hide the center spin boxes
-    centerXSpinBox->setVisible(false);
-    centerYSpinBox->setVisible(false);
-    labelCenterX->setVisible(false);
-    labelCenterY->setVisible(false);
-
     // Set fixed size
     plateXSpinBox->setMinimumWidth(200);
     centerXSpinBox->setMinimumWidth(200);
@@ -75,10 +71,16 @@ DimensionSection::DimensionSection(QWidget *parent) : QWidget(parent) {
     horizontalLayoutCenterY->addWidget(centerYSpinBox);
 
     // Create button to manually input the center coordinates
-    QPushButton *manualCenterButton = new QPushButton("Enter Center Manually", this);
+    manualCenterButton = new QPushButton(tr("Enter Center Manually"), this);
     connect(manualCenterButton, &QPushButton::clicked, [=]() {
         showManualCenterInput(labelCenterX, labelCenterY);
     });
+
+    // Initially hide the center spin boxes
+    centerXSpinBox->setVisible(false);
+    centerYSpinBox->setVisible(false);
+    labelCenterX->setVisible(false);
+    labelCenterY->setVisible(false);
 
     // Connect signals for value changes
     connect(plateXSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DimensionSection::valueChanged);
@@ -94,7 +96,7 @@ DimensionSection::DimensionSection(QWidget *parent) : QWidget(parent) {
     // Set fixed size for the section widget
     dimensionSectionWidget->setFixedSize(570, 475);
 
-    // Create main layout and add the section widget to it
+    // Create main layout and add the section widget to itS
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(sectionTitle);
     mainLayout->addWidget(dimensionSectionWidget);
@@ -102,9 +104,14 @@ DimensionSection::DimensionSection(QWidget *parent) : QWidget(parent) {
     setLayout(mainLayout);
 
     // Apply styles
-    applyStyles();
+    applyStyles(true);
 }
 
+void DimensionSection::retranslateUi() {
+    sectionTitle->setText(tr("Dimension Configuration"));
+    labelTitle->setText(tr("Introduce Plate Size:"));
+    manualCenterButton->setText(tr("Enter Center Manually"));
+}
 
 // Getter method for plate X dimension
 int DimensionSection::getPlateXSpinBox() const {
@@ -136,55 +143,111 @@ void DimensionSection::showManualCenterInput(QLabel *labelX, QLabel *labelY) {
 }
 
 // Apply styles to the section
-void DimensionSection::applyStyles() {
-    setStyleSheet(
-        "QLabel {"
-        "    font-size: 14px;"
-        "    color: #333;"
-        "}"
-        "QPushButton {"
-        "    background-color: #4CAF50;"
-        "    color: #333;"
-        "    border: none;"
-        "    border-radius: 5px;"
-        "    font-size: 14px;"
-        "    padding: 5px 10px;"
-        "}"
-        "QPushButton:hover {"
-        "    background-color: #45a049;"
-        "    color: white;"
-        "}"
-        "QSpinBox {"
-        "    border: 1px solid #ddd;"
-        "    border-radius: 3px;"
-        "    padding: 5px;"
-        "    font-size: 14px;"
-        "}"
-        "QSpinBox::up-button {"
-        "    width: 0px;"
-        "}"
-        "QSpinBox::down-button {"
-        "    width: 0px;"
-        "}"
-        "QSpinBox::up-button:hover {"
-        "    background-color: #ddd;"
-        "}"
-        "QSpinBox::down-button:hover {"
-        "    background-color: #ddd;"
-        "}"
-        "QWidget {"
-        "    background-color: #f9f9f9;"
-        "    padding: 10px;"
-        "    border: 1px solid #ccc;"
-        "    border-radius: 10px;"
-        "}"
-        "QLabel#sectionTitle {"
-        "    font-size: 20px;"
-        "    color: #4CAF50;"
-        "    font-weight: bold;"
-        "    border: 1px solid #ccc;"
-        "    padding: 10px 5px;"
-        "}"
-        );
+void DimensionSection::applyStyles(bool darkMode) {
+    if (darkMode) {
+        setStyleSheet(
+            "QLabel {"
+            "    font-size: 14px;"
+            "    color: white;"
+            "}"
+            "QPushButton {"
+            "    background-color: #555555;"
+            "    color: white;"
+            "    border: none;"
+            "    border-radius: 5px;"
+            "    font-size: 14px;"
+            "    padding: 5px 10px;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #001900;"
+            "    color: white;"
+            "    border: 1px solid #4CAF50; "
+            "}"
+            "QSpinBox {"
+            "    border: 1px solid #555555;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "    background-color: #2d2d2d;"
+            "    color: white;"
+            "}"
+            "QSpinBox::up-button {"
+            "    width: 0px;"
+            "}"
+            "QSpinBox::down-button {"
+            "    width: 0px;"
+            "}"
+            "QSpinBox::up-button:hover {"
+            "    background-color: #666666;"
+            "}"
+            "QSpinBox::down-button:hover {"
+            "    background-color: #666666;"
+            "}"
+            "QWidget {"
+            "    background-color: #212121;"
+            "    padding: 10px;"
+            "    border: 1px solid #555555;"
+            "    border-radius: 10px;"
+            "}"
+            "QLabel#sectionTitle {"
+            "    font-size: 20px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    border: 1px solid #555555;"
+            "    padding: 10px 5px;"
+            "    background-color: #212121;"
+            "}"
+            );
+    } else {
+        setStyleSheet(
+            "QLabel {"
+            "    font-size: 14px;"
+            "    color: #333;"
+            "}"
+            "QPushButton {"
+            "    background-color: #4CAF50;"
+            "    color: black;"
+            "    border: none;"
+            "    border-radius: 5px;"
+            "    font-size: 14px;"
+            "    padding: 5px 10px;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #e6ffe6;"
+            "    color: black;"
+            "    border: 1px solid #4CAF50; "
+            "}"
+            "QSpinBox {"
+            "    border: 1px solid #ddd;"
+            "    border-radius: 3px;"
+            "    padding: 5px;"
+            "    font-size: 14px;"
+            "}"
+            "QSpinBox::up-button {"
+            "    width: 0px;"
+            "}"
+            "QSpinBox::down-button {"
+            "    width: 0px;"
+            "}"
+            "QSpinBox::up-button:hover {"
+            "    background-color: #ddd;"
+            "}"
+            "QSpinBox::down-button:hover {"
+            "    background-color: #ddd;"
+            "}"
+            "QWidget {"
+            "    background-color: #f9f9f9;"
+            "    padding: 10px;"
+            "    border: 1px solid #ccc;"
+            "    border-radius: 10px;"
+            "}"
+            "QLabel#sectionTitle {"
+            "    font-size: 20px;"
+            "    color: #4CAF50;"
+            "    font-weight: bold;"
+            "    border: 1px solid #ccc;"
+            "    padding: 10px 5px;"
+            "}"
+            );
+    }
 }
-

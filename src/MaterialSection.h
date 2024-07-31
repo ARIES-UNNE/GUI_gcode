@@ -56,6 +56,17 @@ private:
 
     // styles
     void applyStyles();
+
+    QLabel *sectionTitle;
+    QLabel *headerLabel1;
+    QLabel *headerLabel2;
+    QLabel *headerLabel3;
+    QLabel *headerLabel4;
+
+public slots:
+    void retranslateUi();
+    void applyStyles(bool darkMode);
+
 };
 
 #endif // MATERIALSECTION_H

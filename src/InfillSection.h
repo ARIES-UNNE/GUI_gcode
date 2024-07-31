@@ -39,9 +39,16 @@ private:
     QLabel *percentage;  // Label for percentage
     QLabel *millimeters;  // Label for millimeters
 
+    QLabel *sectionTitle;
+    QLabel *title;
+
 
     // styles
     void applyStyles();
+
+public slots:
+    void retranslateUi();
+    void applyStyles(bool darkMode);
 };
 
 #endif // INFILLSECTION_H

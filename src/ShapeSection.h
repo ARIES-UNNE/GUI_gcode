@@ -41,8 +41,17 @@ private:
     QComboBox *shapeComboBox;
     QComboBox *shapeComboBox2;
 
+    QLabel *sectionTitle;
+    QLabel *shapeLabel;
+    QLabel *sizeLabel;
+
     // styles
-    void applyStyles();
+
+
+public slots:
+     void retranslateUi();
+       void applyStyles(bool darkMode);
+
 };
 
 #endif // SHAPESECTION_H
