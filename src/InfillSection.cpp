@@ -113,6 +113,15 @@ void InfillSection::retranslateUi() {
     shapeComboBox->setItemText(1, tr("Strand Distance"));
 }
 
+void InfillSection::updateValues(int methodIndex, int infillValue, double strandDistance) {
+    shapeComboBox->setCurrentIndex(methodIndex);
+    if (methodIndex == 0) {
+        infillSpinBox->setValue(infillValue);
+    } else if (methodIndex == 1) {
+        strandDistanceLineEdit->setText(QString::number(strandDistance));
+    }
+}
+
 // Slot to handle method selection changes
 void InfillSection::handleMethodSelection(int index) {
     // Hide all widgets initially

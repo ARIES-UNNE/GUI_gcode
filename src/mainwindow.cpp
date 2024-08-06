@@ -51,6 +51,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(f
     // Section 5: Generate GCODE
     GenerateSection *GenerateSectionWidget = new GenerateSection(this);
 
+    connect(SaveSectionWidget, &SaveSection::section1ValuesRead, DimensionSectionWidget, &DimensionSection::updateValues);
+    connect(SaveSectionWidget, &SaveSection::section2ValuesRead, ShapeSectionWidget, &ShapeSection::updateValues);
+    connect(SaveSectionWidget, &SaveSection::section3ValuesRead, infillSectionWidget, &InfillSection::updateValues);
+    connect(SaveSectionWidget, &SaveSection::section4ValuesRead, materialSectionWidget, &MaterialSection::updateMaterialSection);
+
+
+
     // Create QStackedWidget to manage the sections
     stackedWidget = new QStackedWidget(this);
     stackedWidget->addWidget(sectionStartWidget);
@@ -381,9 +388,8 @@ bool MainWindow::writeConfigurationToFile(const QString &fileName, DimensionSect
         QList<MaterialConfig> materialConfigs = section4Widget->getMaterialConfigs();
         for (const auto& materialConfig : materialConfigs) {
             out << "Material Name: " << materialConfig.name << "\n";
-            out << "Nozzle Size: " << materialConfig.nozzleSize << "\n";
-            out << "Filament Amount: " << materialConfig.filamentAmount << "\n";
-            out << "Amount: " << materialConfig.algo << "\n\n";
+            out << "Filament: " << materialConfig.filament << "\n";
+            out << "Nozzle: " << materialConfig.nozzle << "\n" << "\n";
         }
 
         file.close();

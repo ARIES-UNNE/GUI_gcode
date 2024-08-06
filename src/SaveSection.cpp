@@ -21,7 +21,6 @@ SaveSection::SaveSection(QWidget *parent) : QWidget(parent) {
     QHBoxLayout *scrollContainerLayout = new QHBoxLayout(scrollContainer);
     scrollContainerLayout->addWidget(scrollArea);
 
-
     // Set the initial directory path to the application directory
     directoryPath = QCoreApplication::applicationDirPath();
 
@@ -39,7 +38,7 @@ SaveSection::SaveSection(QWidget *parent) : QWidget(parent) {
 
     mainLayout->addLayout(buttonLayout);
 
-    //LABEL
+    // LABEL
     // Add spacers on top of instruction text
     QSpacerItem *topSpacer = new QSpacerItem(50, 50, QSizePolicy::Minimum, QSizePolicy::Expanding);
     mainLayout->addItem(topSpacer);
@@ -68,8 +67,183 @@ void SaveSection::retranslateUi() {
     instructionLabel->setText(tr("Select Save Configuration"));
 }
 
+void SaveSection::createConfigurations() {
+    QDir directory(directoryPath);
+    // Get the list of .conf files in the directory
+    QStringList confFiles = directory.entryList(QStringList() << "*.conf", QDir::Files);
+
+    // Clear the existing layout to remove any old configuration buttons
+    clearLayout(layout);
+
+    // Loop through each configuration to create a new button for each configuration file
+    for (const QString &fileName : confFiles) {
+        QPushButton *button = new QPushButton(fileName, this);
+        button->setFixedSize(200, 50);
+        button->setProperty("isConfButton", true);
+
+        // Connect the button's clicked signal to a lambda function to handle the click event
+        connect(button, &QPushButton::clicked, this, [this, fileName]() {
+            onConfButtonClicked(fileName);
+        });
+
+        // Add the button to the layout
+        layout->addWidget(button);
+    }
+
+    applyStyles(false);
+}
+
+void SaveSection::changeDirectory() {
+    // Open a file dialog to select a new directory
+    QString newDirectory = QFileDialog::getExistingDirectory(this, tr("Select Directory"), directoryPath);
+    // If a new directory is selected, update the directory path and refresh the configurations
+    if (!newDirectory.isEmpty()) {
+        directoryPath = newDirectory;
+        createConfigurations();
+    }
+}
+
+void SaveSection::clearLayout(QLayout *layout) {
+    QLayoutItem *child;
+    while ((child = layout->takeAt(0)) != nullptr) {
+        if (child->widget()) {
+            delete child->widget();
+        }
+        delete child;
+    }
+}
+
+void SaveSection::onConfButtonClicked(const QString &fileName) {
+    QString confFilePath = directoryPath + "/" + fileName;
+    // Copy the configuration file to the application's directory
+    copyConfiguration(confFilePath);
+    QMessageBox::information(this, tr("Success"), tr("GCODE GENERATED."));
+}
+
+void SaveSection::copyConfiguration(const QString &confFilePath) {
+    // Open the configuration file for reading
+    QFile confFile(confFilePath);
+    if (!confFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return;
+    }
+
+    // Define the path to the target file where the configuration will be copied
+    QString sectionValuesFilePath = QCoreApplication::applicationDirPath() + "/section_values.txt";
+    // Open the target file for writing
+    QFile sectionValuesFile(sectionValuesFilePath);
+    if (!sectionValuesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return;
+    }
+
+    // Create text streams for reading and writing
+    QTextStream confStream(&confFile);
+    QTextStream sectionValuesStream(&sectionValuesFile);
+
+    // Start a Python process to handle GCODE generation
+    QProcess *process = new QProcess(this);
+    QString currentPath = QDir::currentPath();
+    QString pythonScriptPath = currentPath + "/axolotl_1mat.py";
+    process->start("py", QStringList() << pythonScriptPath);
+    if (process->waitForStarted()) {
+        qDebug() << "Python script started successfully.";
+    } else {
+        qDebug() << "Failed to start Python script.";
+    }
+
+    // Copy the contents of the configuration file to the target file
+    sectionValuesStream << confStream.readAll();
+    sectionValuesStream << "\n\n";
+
+    // Close both files
+    sectionValuesFile.close();
+    confFile.close();
+
+    // Read Section values from the file and emit the signal
+    readSectionValues();
+}
+
+void SaveSection::readSectionValues() {
+    QFile file(QCoreApplication::applicationDirPath() + "/section_values.txt");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return;
+    }
+
+    QTextStream in(&file);
+    QString section;
+    int plateX = 0, plateY = 0, centerX = 0, centerY = 0;
+    int shapeIndex1 = 0, shapeIndex2 = 0, size1 = 0, size2 = 0;
+    int methodIndex = 0, infillValue = 0;
+    double strandDistance = 0.0;
+    QList<QPair<QString, QString>> section4Materials;
+
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+
+        if (line.contains("Section1 Values:")) {
+            section = "Section1";
+        } else if (line.contains("Section2 Values:")) {
+            section = "Section2";
+        } else if (line.contains("Section3 Values:")) {
+            section = "Section3";
+        } else if (line.contains("Section4 Values:")) {
+            section = "Section4";
+        } else if (section == "Section1") {
+            if (line.contains("Plate X Value:")) {
+                plateX = line.split(":").last().trimmed().toInt();
+            } else if (line.contains("Plate Y Value:")) {
+                plateY = line.split(":").last().trimmed().toInt();
+            } else if (line.contains("Center X Value:")) {
+                centerX = line.split(":").last().trimmed().toInt();
+            } else if (line.contains("Center Y Value:")) {
+                centerY = line.split(":").last().trimmed().toInt();
+            }
+        } else if (section == "Section2") {
+            if (line.contains("Shape Index 1:")) {
+                shapeIndex1 = line.split(":").last().trimmed().toInt();
+            } else if (line.contains("Shape Index 2:")) {
+                shapeIndex2 = line.split(":").last().trimmed().toInt();
+            } else if (line.contains("Size 1:")) {
+                size1 = line.split(":").last().trimmed().toInt();
+            } else if (line.contains("Size 2:")) {
+                size2 = line.split(":").last().trimmed().toInt();
+            }
+        } else if (section == "Section3") {
+            if (line.contains("Method Index:")) {
+                methodIndex = line.split(":").last().trimmed().toInt();
+            } else if (line.contains("Infill Value:")) {
+                infillValue = line.split(":").last().trimmed().toInt();
+            } else if (line.contains("Strand Distance:")) {
+                strandDistance = line.split(":").last().trimmed().toDouble();
+            }
+        } else if (section == "Section4") {
+            if (line.contains("Material Name:")) {
+                QString materialName = line.split(":").last().trimmed();
+                QString filament, nozzle;
+                while (!in.atEnd()) {
+                    line = in.readLine();
+                    if (line.contains("Filament:")) {
+                        filament = line.split(":").last().trimmed();
+                    } else if (line.contains("Nozzle:")) {
+                        nozzle = line.split(":").last().trimmed();
+                    } else if (line.trimmed().isEmpty()) {
+                        section4Materials.append(qMakePair(materialName, filament + " | " + nozzle));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    file.close();
+
+    emit section1ValuesRead(plateX, plateY, centerX, centerY);
+    emit section2ValuesRead(shapeIndex1, shapeIndex2, size1, size2);
+    emit section3ValuesRead(methodIndex, infillValue, strandDistance);
+    emit section4ValuesRead(section4Materials);
+}
+
 // Aplica estilos a los widgets de la sección
-void SaveSection::applyStyles(bool darkMode) {
+    void SaveSection::applyStyles(bool darkMode) {
     if (darkMode) {
         setStyleSheet(
             "QScrollArea {"
@@ -154,100 +328,4 @@ void SaveSection::applyStyles(bool darkMode) {
             "}"
             );
     }
-}
-
-// Creates and refreshes the list of configuration files in the current directory
-void SaveSection::createConfigurations() {
-    QDir directory(directoryPath);
-    // Get the list of .conf files in the directory
-    QStringList confFiles = directory.entryList(QStringList() << "*.conf", QDir::Files);
-
-    // Clear the existing layout to remove any old configuration buttons
-    clearLayout(layout);
-
-    // Loop through each configuration to create a new button for each configuration file
-    for (const QString &fileName : confFiles) {
-        QPushButton *button = new QPushButton(fileName, this);
-        button->setFixedSize(200, 50);
-        button->setProperty("isConfButton", true);
-
-        // Connect the button's clicked signal to a lambda function to handle the click event
-        connect(button, &QPushButton::clicked, this, [this, fileName]() {
-            onConfButtonClicked(fileName);
-        });
-
-        // Add the button to the layout
-        layout->addWidget(button);
-    }
-
-    applyStyles(false);
-}
-
-// Changes the directory to a new path selected by the user
-void SaveSection::changeDirectory() {
-    // Open a file dialog to select a new directory
-    QString newDirectory = QFileDialog::getExistingDirectory(this, tr("Select Directory"), directoryPath);
-    // If a new directory is selected, update the directory path and refresh the configurations
-    if (!newDirectory.isEmpty()) {
-        directoryPath = newDirectory;
-        createConfigurations();
-    }
-}
-
-// Clears the provided layout by removing all its child widgets
-void SaveSection::clearLayout(QLayout *layout) {
-    QLayoutItem *child;
-    while ((child = layout->takeAt(0)) != nullptr) {
-        if (child->widget()) {
-            delete child->widget();
-        }
-        delete child;
-    }
-}
-// Mesagge called when a configuration button is clicked
-void SaveSection::onConfButtonClicked(const QString &fileName) {
-    QString confFilePath = directoryPath + "/" + fileName;
-    // Copy the configuration file to the application's directory
-    copyConfiguration(confFilePath);
-    QMessageBox::information(this, tr("Success"), tr("GCODE GENERATED."));
-}
-
-// Copies the selected configuration file "section_values.txt"
-void SaveSection::copyConfiguration(const QString &confFilePath) {
-    // Open the configuration file for reading
-    QFile confFile(confFilePath);
-    if (!confFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        return;
-    }
-
-    // Define the path to the target file where the configuration will be copied
-    QString sectionValuesFilePath = QCoreApplication::applicationDirPath() + "/section_values.txt";
-    // Open the target file for writing
-    QFile sectionValuesFile(sectionValuesFilePath);
-    if (!sectionValuesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        return;
-    }
-
-    // Create text streams for reading and writing
-    QTextStream confStream(&confFile);
-    QTextStream sectionValuesStream(&sectionValuesFile);
-
-    // Start a Python process to handle GCODE generation
-    QProcess *process = new QProcess(this);
-    QString currentPath = QDir::currentPath();
-    QString pythonScriptPath = currentPath + "/axolotl_1mat.py";
-    process->start("py", QStringList() << pythonScriptPath);
-    if (process->waitForStarted()) {
-        qDebug() << "Python script started successfully.";
-    } else {
-        qDebug() << "Failed to start Python script.";
-    }
-
-    // Copy the contents of the configuration file to the target file
-    sectionValuesStream << confStream.readAll();
-    sectionValuesStream << "\n\n";
-
-    // Close both files
-    sectionValuesFile.close();
-    confFile.close();
 }

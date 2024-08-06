@@ -17,11 +17,10 @@
 
 // Structure to hold material configuration details
 struct MaterialConfig {
-    QString name;            // Name of the material
-    int nozzleSize;          // Size of the nozzle
-    double filamentAmount;   // Amount of filament
-    double algo;             // algo
-};
+    QString name;
+    QString filament;
+    QString nozzle;
+};//
 
 // MaterialSection class to manage material configurations
 class MaterialSection : public QWidget {
@@ -48,6 +47,9 @@ private slots:
     // funtion to update the material configurations
     void updateMaterialConfigs();
 
+    void updateMaterialPreset(QComboBox *materialComboBox, QComboBox *filamentComboBox, QComboBox *nozzleComboBox);
+    void restrictNozzleOptions(QComboBox *nozzleComboBox, const QStringList &validOptions);
+
 private:
     QSpinBox *numMaterialsSpinBox;        // Spin box to select number of materials
     QWidget *materialNamesContainer;      // Container widget for material names
@@ -66,6 +68,8 @@ private:
 public slots:
     void retranslateUi();
     void applyStyles(bool darkMode);
+    void updateMaterialSection(const QList<QPair<QString, QString>> &materials);
+
 
 };
 

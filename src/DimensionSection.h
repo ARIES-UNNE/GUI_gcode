@@ -52,6 +52,9 @@ private:
 
 public slots:
 
+    void updateValues(int plateX, int plateY, int centerX, int centerY);
+
+
     // Trasnlation
     void retranslateUi();
     void applyStyles(bool darkMode);

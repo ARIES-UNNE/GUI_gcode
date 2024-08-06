@@ -49,6 +49,8 @@ private:
 public slots:
     void retranslateUi();
     void applyStyles(bool darkMode);
+    void updateValues(int methodIndex, int infillValue, double strandDistance);
+
 };
 
 #endif // INFILLSECTION_H

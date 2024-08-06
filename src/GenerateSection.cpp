@@ -10,7 +10,7 @@ GenerateSection::GenerateSection(QWidget *parent) : QWidget(parent) {
     completionLabel->setAlignment(Qt::AlignCenter);
 
     // Create button to generate GCODE
-    generateButton = new QPushButton(tr("GENERATE GCODE"), this);
+    generateButton = new QPushButton(tr("SAVE GCODE"), this);
     connect(generateButton, &QPushButton::clicked, this, [this]() {
         emit generateGcode();
     });

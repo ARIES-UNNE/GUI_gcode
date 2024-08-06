@@ -156,6 +156,14 @@ void ShapeSection::handleShapeSelection(int index) {
     }
 }
 
+void ShapeSection::updateValues(int shapeIndex1, int shapeIndex2, int size1, int size2) {
+    shapeComboBox->setCurrentIndex(shapeIndex1);
+    shapeComboBox2->setCurrentIndex(shapeIndex2);
+    sizeLineEdit->setText(QString::number(size1));
+    sizeLineEdit2->setText(QString::number(size2));
+}
+
+
 // Getter for size 1
 int ShapeSection::getSize1() const {
     return sizeLineEdit->text().toInt();

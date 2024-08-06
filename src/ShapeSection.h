@@ -51,6 +51,8 @@ private:
 public slots:
      void retranslateUi();
        void applyStyles(bool darkMode);
+     void updateValues(int size1, int size2, int shapeIndex1, int shapeIndex2);
+
 
 };
 

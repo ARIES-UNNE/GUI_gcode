@@ -142,6 +142,14 @@ void DimensionSection::showManualCenterInput(QLabel *labelX, QLabel *labelY) {
     labelY->setVisible(!isVisible);
 }
 
+void DimensionSection::updateValues(int plateX, int plateY, int centerX, int centerY) {
+    plateXSpinBox->setValue(plateX);
+    plateYSpinBox->setValue(plateY);
+    centerXSpinBox->setValue(centerX);
+    centerYSpinBox->setValue(centerY);
+}
+
+
 // Apply styles to the section
 void DimensionSection::applyStyles(bool darkMode) {
     if (darkMode) {
