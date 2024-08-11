@@ -12,7 +12,8 @@
 #include <QApplication>
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(false) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(false), changeDetected(false)
+ {
     // Create a central widget for the main window
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -35,18 +36,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(f
 
     // Section 0: Save configuration
     SaveSection *SaveSectionWidget = new SaveSection(this);
+    connect(SaveSectionWidget, &SaveSection::nextSection, this, [this]() {
+        nextSection();  // Move to the next section
+        changeDetected = false;
+    });
 
     // Section 1: Dimension configuration
-    DimensionSection *DimensionSectionWidget = new DimensionSection(this);
+    DimensionSectionWidget = new DimensionSection(this);
 
     // Section 2: Shape configuration
-    ShapeSection *ShapeSectionWidget = new ShapeSection(this);
+    ShapeSectionWidget = new ShapeSection(this);
 
     // Section 3: Infill configuration
-    InfillSection *infillSectionWidget = new InfillSection(this);
+    infillSectionWidget = new InfillSection(this);
 
     // Section 4: Material configuration
-    MaterialSection *materialSectionWidget = new MaterialSection(this);
+    materialSectionWidget = new MaterialSection(this);
 
     // Section 5: Generate GCODE
     GenerateSection *GenerateSectionWidget = new GenerateSection(this);
@@ -57,6 +62,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(f
     connect(SaveSectionWidget, &SaveSection::section4ValuesRead, materialSectionWidget, &MaterialSection::updateMaterialSection);
 
 
+    connect(DimensionSectionWidget, &DimensionSection::plateSizeChanged, this, &MainWindow::updatePlateSize);
 
     // Create QStackedWidget to manage the sections
     stackedWidget = new QStackedWidget(this);
@@ -86,16 +92,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(f
 
     // Create button to go to the next section
     nextButton = new QPushButton(tr("Next"), this);
-    connect(nextButton, &QPushButton::clicked, this, [this, DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget]() {
+    connect(nextButton, &QPushButton::clicked, this, [this]() {
         nextSection();
         // Update 3D visualicer on next-section action
-        RealTimeGCODE(DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget);
+        RealTimeGCODE();
     });
     buttonsLayout->addWidget(nextButton);
 
     // Create connection to generate GCODE
-    connect(GenerateSectionWidget, &GenerateSection::generateGcode, this, [this, DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget]() {
-        saveConfigurationToFile(DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget);
+    connect(GenerateSectionWidget, &GenerateSection::generateGcode, this, [this]() {
+        saveConfigurationToFile();
+    });
+
+    connect(SaveSectionWidget, &SaveSection::fileSelected, this, [this](const QString &fileName) {
+        loadedConfigFileName = fileName;
     });
 
 
@@ -134,16 +144,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(f
     mainLayout->addWidget(openGLContainer);
 
     // Connect signals of sections to RealTimeGCODE (all sections send signals to mainwindow every time any value changes on them)
-    connect(DimensionSectionWidget, &DimensionSection::valueChanged, this, [this, DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget]() {
-        RealTimeGCODE(DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget);
+    connect(DimensionSectionWidget, &DimensionSection::valueChanged, this, [this]() {
+        RealTimeGCODE();
+        changeDetected = true;
     });
 
-    connect(ShapeSectionWidget, &ShapeSection::valueChanged, this, [this, DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget]() {
-        RealTimeGCODE(DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget);
+    connect(ShapeSectionWidget, &ShapeSection::valueChanged, this, [this]() {
+        RealTimeGCODE();
+        changeDetected = true;
     });
 
-    connect(infillSectionWidget, &InfillSection::valueChanged, this, [this, DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget]() {
-        RealTimeGCODE(DimensionSectionWidget, ShapeSectionWidget, infillSectionWidget, materialSectionWidget);
+    connect(infillSectionWidget, &InfillSection::valueChanged, this, [this]() {
+        RealTimeGCODE();
+        changeDetected = true;
+
+    });
+
+    connect(materialSectionWidget, &MaterialSection::valueChanged, this, [this]() {
+        RealTimeGCODE();
+        changeDetected = true;
     });
 
     // Initially hide the buttons and OpenGL widget
@@ -241,11 +260,22 @@ void MainWindow::applyLightMode() {
     nextButton->setStyleSheet(navButtonStyle);
     cancelButton->setStyleSheet(navButtonStyle);
     toggleDarkModeButton->setStyleSheet(navButtonStyle);
+
 }
 
 // Apply dark mode styles
 void MainWindow::applyDarkMode() {
-    setStyleSheet("MainWindow { background-color: #1a1a1a; }");
+    setStyleSheet(
+        "MainWindow { background-color: #1a1a1a; }"
+        "QPushButton { "
+        "background-color: #2a2a2a; "
+        "color: white; "
+        "border-radius: 5px; "
+        "padding: 10px;"
+        "}"
+        "QPushButton:hover { background-color: #001900; border: 1px solid #4CAF50; }"
+        "QWidget { background-color: #1a1a1a; color: #ffffff; }"
+        );
 
     QString navButtonStyle = "QPushButton { background-color: #2a2a2a; color: white;"
                              "border-radius: 5px; }"
@@ -294,6 +324,7 @@ void MainWindow::cancelConfirmation() {
     reply = QMessageBox::question(this, "Cancel Confirmation", "Are you sure you want to cancel?",
                                   QMessageBox::Yes|QMessageBox::No);
 
+
     // Close the application if user confirms
     if (reply == QMessageBox::Yes) {
         close();
@@ -309,15 +340,27 @@ void MainWindow::previousSection() {
     }
 }
 
-// Show the next section
 void MainWindow::nextSection() {
+
+    if (changeDetected && stackedWidget->currentIndex() != 1 && !loadedConfigFileName.isEmpty()) {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Update Configuration", "You have made a change. Do you want to update it?",
+                                      QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            // Llamar a saveConfigurationToFile con el archivo cargado
+            QFileInfo fileInfo(loadedConfigFileName);
+            QString baseFileName = fileInfo.baseName(); // Para ejemplo, podrías extraer información relevante del nombre del archivo
+            writeConfigurationToFile(loadedConfigFileName);
+        }
+        changeDetected = false;
+    }
+
     int nextIndex = stackedWidget->currentIndex() + 1;
     if (nextIndex < stackedWidget->count()) {
         sectionConfiguration(nextIndex);
         stackedWidget->setCurrentIndex(nextIndex);
     }
 }
-
 // Execute the Python script
 void MainWindow::executePython() {
     QProcess *process = new QProcess(this);
@@ -332,8 +375,10 @@ void MainWindow::executePython() {
 }
 
 // Save the configuration to a file
-void MainWindow::saveConfigurationToFile(DimensionSection *section1Widget, ShapeSection *section2Widget, InfillSection *section3Widget, MaterialSection *section4Widget) {
-    if (writeConfigurationToFile("section_values.txt", section1Widget, section2Widget, section3Widget, section4Widget)) {
+void MainWindow::saveConfigurationToFile() {
+    QString directoryPath = QCoreApplication::applicationDirPath() + "/configurations";
+
+    if (writeConfigurationToFile("section_values.txt")) {
         QMessageBox::information(this, "Configuration Saved", "Configuration saved to section_values.txt.");
     } else {
         QMessageBox::critical(this, "Error", "Failed to save configuration to section_values.txt.");
@@ -344,9 +389,9 @@ void MainWindow::saveConfigurationToFile(DimensionSection *section1Widget, Shape
                                   QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        QString fileName = QFileDialog::getSaveFileName(this, "Save Configuration", QDir::currentPath(), "Configuration Files (*.conf)");
+        QString fileName = QFileDialog::getSaveFileName(this, "Save Configuration", directoryPath, "Configuration Files (*.conf)");
         if (!fileName.isEmpty()) {
-            if (writeConfigurationToFile(fileName, section1Widget, section2Widget, section3Widget, section4Widget)) {
+            if (writeConfigurationToFile(fileName)) {
                 QMessageBox::information(this, "Configuration Saved", "Configuration saved successfully.");
             } else {
                 QMessageBox::critical(this, "Error", "Failed to save configuration to file.");
@@ -358,34 +403,34 @@ void MainWindow::saveConfigurationToFile(DimensionSection *section1Widget, Shape
 }
 
 // Write the configuration to a file
-bool MainWindow::writeConfigurationToFile(const QString &fileName, DimensionSection *section1Widget, ShapeSection *section2Widget, InfillSection *section3Widget, MaterialSection *section4Widget) {
+bool MainWindow::writeConfigurationToFile(const QString &fileName) {
     QFile file(fileName);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
 
         // Section1 values
         out << "Section1 Values:\n";
-        out << "Plate X Value: " << section1Widget->getPlateXSpinBox() << "\n";
-        out << "Plate Y Value: " << section1Widget->getPlateYSpinBox() << "\n";
-        out << "Center X Value: " << section1Widget->getcenterXSpinBox() << "\n";
-        out << "Center Y Value: " << section1Widget->getcenterYSpinBox() << "\n\n";
+        out << "Plate X Value: " << DimensionSectionWidget->getPlateXSpinBox() << "\n";
+        out << "Plate Y Value: " << DimensionSectionWidget->getPlateYSpinBox() << "\n";
+        out << "Center X Value: " << DimensionSectionWidget->getcenterXSpinBox() << "\n";
+        out << "Center Y Value: " << DimensionSectionWidget->getcenterYSpinBox() << "\n\n";
 
         // Section2 values
         out << "Section2 Values:\n";
-        out << "Size 1: " << section2Widget->getSize1() << "\n";
-        out << "Size 2: " << section2Widget->getSize2() << "\n";
-        out << "Shape Index 1: " << section2Widget->getShapeIndex1() << "\n";
-        out << "Shape Index 2: " << section2Widget->getShapeIndex2() << "\n\n";
+        out << "Size 1: " << ShapeSectionWidget->getSize1() << "\n";
+        out << "Size 2: " << ShapeSectionWidget->getSize2() << "\n";
+        out << "Shape Index 1: " << ShapeSectionWidget->getShapeIndex1() << "\n";
+        out << "Shape Index 2: " << ShapeSectionWidget->getShapeIndex2() << "\n\n";
 
         // Section3 values
         out << "Section3 Values:\n";
-        out << "Infill Value: " << section3Widget->getInfillValue() << "\n";
-        out << "Shape Index: " << section3Widget->getShapeIndex() << "\n";
-        out << "Strand Distance Value: " << section3Widget->getStrandDistanceValue() << "\n\n";
+        out << "Infill Value: " << infillSectionWidget->getInfillValue() << "\n";
+        out << "Shape Index: " << infillSectionWidget->getShapeIndex() << "\n";
+        out << "Strand Distance Value: " << infillSectionWidget->getStrandDistanceValue() << "\n\n";
 
         // Section4 values
         out << "Section4 Values:\n";
-        QList<MaterialConfig> materialConfigs = section4Widget->getMaterialConfigs();
+        QList<MaterialConfig> materialConfigs = materialSectionWidget->getMaterialConfigs();
         for (const auto& materialConfig : materialConfigs) {
             out << "Material Name: " << materialConfig.name << "\n";
             out << "Filament: " << materialConfig.filament << "\n";
@@ -400,8 +445,13 @@ bool MainWindow::writeConfigurationToFile(const QString &fileName, DimensionSect
 }
 
 // Update GCODE in real-time
-void MainWindow::RealTimeGCODE(DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget) {
-    writeConfigurationToFile("section_values.txt", DimensionSectionWidget, ShapeSectionWidget, InfillSectionWidget, MaterialSectionWidget);
+void MainWindow::RealTimeGCODE() {
+    writeConfigurationToFile("section_values.txt");
     executePython();
 }
 
+void MainWindow::updatePlateSize(const QVector2D &size) {
+    if (openGLWidget) {
+        openGLWidget->setPlateSize(static_cast<int>(size.x()), static_cast<int>(size.y()));
+    }
+}

@@ -11,7 +11,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSpacerItem>
-
+#include <QVector2D>
 
 class DimensionSection : public QWidget {
     Q_OBJECT
@@ -30,10 +30,12 @@ signals:
 
     // Signal emitted when any value in the section changes
     void valueChanged();
+    void plateSizeChanged(const QVector2D &size);
 
 private slots:
     // Slot to show/hide manual center input fields
     void showManualCenterInput(QLabel *labelX, QLabel *labelY);
+
 
 private:
     // Spin boxes for plate dimensions and center coordinates
@@ -46,6 +48,14 @@ private:
     QLabel *sectionTitle;
     QLabel *labelTitle;
     QPushButton *manualCenterButton;
+
+    void onPlateXChanged(int value) {
+        emit plateSizeChanged(QVector2D(value, plateYSpinBox->value()));
+    }
+
+    void onPlateYChanged(int value) {
+        emit plateSizeChanged(QVector2D(plateXSpinBox->value(), value));
+    }
 
     // styles
     void applyStyles();

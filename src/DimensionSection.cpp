@@ -13,8 +13,12 @@ DimensionSection::DimensionSection(QWidget *parent) : QWidget(parent) {
     centerXSpinBox = new QSpinBox(this);
     centerYSpinBox = new QSpinBox(this);
 
-    centerXSpinBox->setRange(-150, 150);
-    centerYSpinBox->setRange(-150, 150);
+    centerXSpinBox->setRange(0, 150);
+    centerYSpinBox->setRange(0, 150);
+    plateXSpinBox->setRange(20, 200);
+    plateYSpinBox->setRange(20, 200);
+    plateXSpinBox->setValue(70);
+    plateYSpinBox->setValue(70);
 
     // Create labels
     QLabel *labelX = new QLabel("X:", this);
@@ -87,6 +91,10 @@ DimensionSection::DimensionSection(QWidget *parent) : QWidget(parent) {
     connect(plateYSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DimensionSection::valueChanged);
     connect(centerXSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DimensionSection::valueChanged);
     connect(centerYSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DimensionSection::valueChanged);
+
+    // Connect signals for value changes
+    connect(plateXSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DimensionSection::onPlateXChanged);
+    connect(plateYSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DimensionSection::onPlateYChanged);
 
     // Add elements to the section layout
     sectionLayout->addWidget(manualCenterButton);

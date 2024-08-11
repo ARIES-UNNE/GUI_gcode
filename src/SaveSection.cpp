@@ -22,7 +22,7 @@ SaveSection::SaveSection(QWidget *parent) : QWidget(parent) {
     scrollContainerLayout->addWidget(scrollArea);
 
     // Set the initial directory path to the application directory
-    directoryPath = QCoreApplication::applicationDirPath();
+    directoryPath = QCoreApplication::applicationDirPath() + "/configurations";
 
     // Create and configure the change directory button
     changeDirectoryButton = new QPushButton(tr("Change Directory"), this);
@@ -117,7 +117,8 @@ void SaveSection::onConfButtonClicked(const QString &fileName) {
     QString confFilePath = directoryPath + "/" + fileName;
     // Copy the configuration file to the application's directory
     copyConfiguration(confFilePath);
-    QMessageBox::information(this, tr("Success"), tr("GCODE GENERATED."));
+    emit fileSelected(fileName);
+    emit nextSection();
 }
 
 void SaveSection::copyConfiguration(const QString &confFilePath) {
@@ -243,7 +244,7 @@ void SaveSection::readSectionValues() {
 }
 
 // Aplica estilos a los widgets de la sección
-    void SaveSection::applyStyles(bool darkMode) {
+void SaveSection::applyStyles(bool darkMode) {
     if (darkMode) {
         setStyleSheet(
             "QScrollArea {"

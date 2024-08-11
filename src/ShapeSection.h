@@ -44,6 +44,9 @@ private:
     QLabel *sectionTitle;
     QLabel *shapeLabel;
     QLabel *sizeLabel;
+    QLabel *mmLabel;
+    QLabel *mmNLabel;
+    QLabel *sizeUnitLabel;
 
     // styles
 

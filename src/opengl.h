@@ -9,6 +9,9 @@
 #include <QVector3D>
 #include <QWheelEvent>
 #include <QMouseEvent>
+#include <QFont>
+#include <QFontMetrics>
+#include <QPainter>
 
 struct MovementLimits {
     float left;
@@ -38,10 +41,12 @@ protected:
 private slots:
     void checkFile();
 
+public slots:
+    void setPlateSize(int plateX, int plateY);
+
 private:
     void parseGCode(const QString &filePath);
     bool fileModified();
-
 
     QTimer *fileCheckTimer;
     QString filePath;
@@ -58,6 +63,17 @@ private:
     void updateMovementLimits();
 
     MovementLimits movementLimits;
+
+    QPointF getFigureCenter() const;
+    QPointF getViewCenter() const;
+    QPointF getArrowDirection() const;
+
+    void drawDirectionArrow(QPainter &painter) const;
+
+
+
+    float plateX;
+    float plateY;
 
 };
 

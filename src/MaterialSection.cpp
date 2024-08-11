@@ -147,11 +147,8 @@ void MaterialSection::updateMaterialNames(int numMaterials) {
         nozzleComboBox->addItem(tr("30G (160 µm, transparent)"));
 
         materialComboBox->setMinimumWidth(150);
-        materialComboBox->setMaximumWidth(150);
         filamentComboBox->setMinimumWidth(150);
-        filamentComboBox->setMaximumWidth(150);
         nozzleComboBox->setMinimumWidth(200);
-        nozzleComboBox->setMaximumWidth(200);
 
         materialRowLayout->addWidget(materialComboBox);
         materialRowLayout->addWidget(filamentComboBox);
@@ -163,12 +160,24 @@ void MaterialSection::updateMaterialNames(int numMaterials) {
         connect(filamentComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MaterialSection::updateMaterialConfigs);
         connect(nozzleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MaterialSection::updateMaterialConfigs);
 
-        connect(materialComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]() { updateMaterialPreset(materialComboBox, filamentComboBox, nozzleComboBox); });
+        connect(materialComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]() {
+            updateMaterialPreset(materialComboBox, filamentComboBox, nozzleComboBox);
+            emit valueChanged();  // Emitir señal cuando se cambia el material
+        });
+
+        connect(filamentComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]() {
+            emit valueChanged();  // Emitir señal cuando se cambia el filamento
+        });
+
+        connect(nozzleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]() {
+            emit valueChanged();  // Emitir señal cuando se cambia la boquilla
+        });
     }
 
     materialNamesContainer->update();
 
     updateMaterialConfigs();
+    emit valueChanged();  // Emitir señal cuando se cambia el número de materiales
 }
 
 void MaterialSection::updateMaterialPreset(QComboBox *materialComboBox, QComboBox *filamentComboBox, QComboBox *nozzleComboBox) {
@@ -317,11 +326,23 @@ void MaterialSection::updateMaterialSection(const QList<QPair<QString, QString>>
         materialRowLayout->addWidget(materialComboBox);
         materialRowLayout->addWidget(filamentComboBox);
         materialRowLayout->addWidget(nozzleComboBox);
-
         materialNamesLayout->addWidget(materialRow);
+
+        connect(materialComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MaterialSection::updateMaterialConfigs);
+        connect(filamentComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MaterialSection::updateMaterialConfigs);
+        connect(nozzleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MaterialSection::updateMaterialConfigs);
 
         connect(materialComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]() {
             updateMaterialPreset(materialComboBox, filamentComboBox, nozzleComboBox);
+            emit valueChanged();
+        });
+
+        connect(filamentComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]() {
+            emit valueChanged();
+        });
+
+        connect(nozzleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]() {
+            emit valueChanged();
         });
 
         updateMaterialPreset(materialComboBox, filamentComboBox, nozzleComboBox);

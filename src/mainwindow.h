@@ -43,6 +43,10 @@ private:
     QStackedWidget *stackedWidget;
     // Pointer to the OpenGL widget
     OpenGLWidget *openGLWidget;
+    DimensionSection *DimensionSectionWidget;
+    ShapeSection *ShapeSectionWidget;
+    InfillSection *infillSectionWidget;
+    MaterialSection *materialSectionWidget;
 
     // Pointers to the buttons in the main window
     QPushButton *cancelButton;
@@ -59,11 +63,11 @@ private:
 
     bool darkModeEnabled;
 
-
-
+    QString loadedConfigFileName;
+    bool changeDetected;
 
     // Method to write configuration to a file
-    bool writeConfigurationToFile(const QString &fileName, DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
+    bool writeConfigurationToFile(const QString &fileName);
 
 private slots:
     // Slot to move to the next section
@@ -77,14 +81,15 @@ private slots:
     void sectionConfiguration(int sectionIndex);
 
     // Slot to save the configuration to a file
-    void saveConfigurationToFile(DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
+    void saveConfigurationToFile();
     // Slot to update the GCODE in real-time
-    void RealTimeGCODE(DimensionSection *DimensionSectionWidget, ShapeSection *ShapeSectionWidget, InfillSection *InfillSectionWidget, MaterialSection *MaterialSectionWidget);
+    void RealTimeGCODE();
     // Slot to execute a Python script
     void executePython();
 
     void changeLanguage(const QString &languageCode);
 
+    void updatePlateSize(const QVector2D &size);
 
 
 };

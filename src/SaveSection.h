@@ -41,6 +41,7 @@ private:
     void readSectionValues();
 
 
+
     //  Styles
 
 signals:
@@ -51,6 +52,9 @@ signals:
     void section2ValuesRead(int size1, int size2, int shapeIndex1, int shapeIndex2);
     void section3ValuesRead(int methodIndex, int infillValue, double strandDistance);
     void section4ValuesRead(const QList<QPair<QString, QString>> &materials);
+
+    void nextSection();
+    void fileSelected(const QString &fileName);
 
 private slots:
     // funtion to change the directory

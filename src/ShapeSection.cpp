@@ -19,7 +19,7 @@ ShapeSection::ShapeSection(QWidget *parent) : QWidget(parent) {
     shapeComboBox2 = new QComboBox(this);
     shapeComboBox2->setPlaceholderText(tr("Select a Size"));
     shapeComboBox2->addItem(tr("Number of Layers"));
-    shapeComboBox2->addItem(tr("Height in mm"));
+    shapeComboBox2->addItem(tr("Height"));
 
     // Initialize labels
     shapeLabel = new QLabel(tr("Shape Type"), this);
@@ -31,6 +31,14 @@ ShapeSection::ShapeSection(QWidget *parent) : QWidget(parent) {
 
     sizeLineEdit2 = new QLineEdit(this);
     sizeLineEdit2->setPlaceholderText(tr("Enter"));
+
+    mmLabel = new QLabel(tr("mm:"), this);
+    mmLabel->setMaximumWidth(55);
+    mmLabel->setVisible(false);
+
+    sizeUnitLabel = new QLabel(this);
+    sizeUnitLabel->setMaximumWidth(55);
+    sizeUnitLabel->setVisible(false);
 
     // Set size and alignment for labels
     shapeLabel->setMinimumWidth(uniformSize);
@@ -67,11 +75,13 @@ ShapeSection::ShapeSection(QWidget *parent) : QWidget(parent) {
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
     horizontalLayout->setAlignment(Qt::AlignHCenter);
     horizontalLayout->addWidget(shapeComboBox);
+    horizontalLayout->addWidget(mmLabel);
     horizontalLayout->addWidget(sizeLineEdit);
 
     QHBoxLayout *horizontalLayout2 = new QHBoxLayout;
     horizontalLayout2->setAlignment(Qt::AlignHCenter);
     horizontalLayout2->addWidget(shapeComboBox2);
+    horizontalLayout2->addWidget(sizeUnitLabel);
     horizontalLayout2->addWidget(sizeLineEdit2);
 
     QHBoxLayout *horizontalLayoutLabel = new QHBoxLayout;
@@ -124,35 +134,33 @@ ShapeSection::ShapeSection(QWidget *parent) : QWidget(parent) {
     applyStyles(false);
 }
 
-void ShapeSection::retranslateUi() {
-    sectionTitle->setText(tr("Shape Configuration"));
-    shapeLabel->setText(tr("Shape Type"));
-    sizeLabel->setText(tr("Size Type"));
-    shapeComboBox->setItemText(0, tr("Circle"));
-    shapeComboBox->setItemText(1, tr("Square"));
-    shapeComboBox2->setItemText(0, tr("Number of Layers"));
-    shapeComboBox2->setItemText(1, tr("Height in mm"));
-    shapeComboBox->setPlaceholderText(tr("Select a Shape"));
-    shapeComboBox2->setPlaceholderText(tr("Select a Size"));
-    sizeLineEdit->setPlaceholderText(tr("Enter size in mm"));
-    sizeLineEdit2->setPlaceholderText(tr("Enter"));
-}
-
 // Slot to handle shape selection changes
 void ShapeSection::handleShapeSelection(int index) {
     // Show or hide size line edit based on selected shape
     bool showSizeLineEdit = (shapeComboBox->currentText() == tr("Square") || shapeComboBox->currentText() == tr("Circle"));
     sizeLineEdit->setVisible(showSizeLineEdit);
 
+
+    mmLabel->setVisible(showSizeLineEdit && shapeComboBox->currentIndex() >= 0);
+
     // Show or hide additional size line edit based on second combo box selection
-    bool showSizeLineEdit2 = (shapeComboBox2->currentText() == tr("Number of Layers") || shapeComboBox2->currentText() == tr("Height in mm"));
+    bool showSizeLineEdit2 = (shapeComboBox2->currentText() == tr("Number of Layers") || shapeComboBox2->currentText() == tr("Height"));
     sizeLineEdit2->setVisible(showSizeLineEdit2);
 
     // Update placeholder text based on selected shape
     if (shapeComboBox->currentText() == tr("Square")) {
-        sizeLineEdit->setPlaceholderText(tr("Side in mm"));
+        sizeLineEdit->setPlaceholderText(tr("Side"));
     } else if (shapeComboBox->currentText() == tr("Circle")) {
-        sizeLineEdit->setPlaceholderText(tr("Diameter in mm"));
+        sizeLineEdit->setPlaceholderText(tr("Diameter"));
+    }
+
+    sizeUnitLabel->setVisible(showSizeLineEdit2 && shapeComboBox2->currentIndex() >= 0);
+
+    // Update size unit label based on selected size type
+    if (shapeComboBox2->currentText() == tr("Height")) {
+        sizeUnitLabel->setText(tr("mm:"));
+    } else if (shapeComboBox2->currentText() == tr("Number of Layers")) {
+        sizeUnitLabel->setText(tr("N:"));
     }
 }
 
@@ -163,6 +171,20 @@ void ShapeSection::updateValues(int shapeIndex1, int shapeIndex2, int size1, int
     sizeLineEdit2->setText(QString::number(size2));
 }
 
+
+void ShapeSection::retranslateUi() {
+    sectionTitle->setText(tr("Shape Configuration"));
+    shapeLabel->setText(tr("Shape Type"));
+    sizeLabel->setText(tr("Size Type"));
+    shapeComboBox->setItemText(0, tr("Circle"));
+    shapeComboBox->setItemText(1, tr("Square"));
+    shapeComboBox2->setItemText(0, tr("Number of Layers"));
+    shapeComboBox2->setItemText(1, tr("Height"));
+    shapeComboBox->setPlaceholderText(tr("Select a Shape"));
+    shapeComboBox2->setPlaceholderText(tr("Select a Size"));
+    sizeLineEdit->setPlaceholderText(tr("Enter size in mm"));
+    sizeLineEdit2->setPlaceholderText(tr("Enter"));
+}
 
 // Getter for size 1
 int ShapeSection::getSize1() const {
