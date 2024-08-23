@@ -1,39 +1,37 @@
 #include "SaveSection.h"
 
 SaveSection::SaveSection(QWidget *parent) : QWidget(parent) {
-    // Initialize the scroll area and the widget that will contain the layout
     QScrollArea *scrollArea = new QScrollArea(this);
     scrollWidget = new QWidget(this);
     scrollWidget->setObjectName("scrollWidget");
 
-    // Create a vertical layout for the scroll widget and align it to the top and center horizontally
     layout = new QVBoxLayout(scrollWidget);
     layout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 
-    // Configure the scroll area
     scrollArea->setMaximumSize(240, 400);
     scrollArea->setMinimumSize(240, 400);
     scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(scrollWidget);
 
-    // Create a container widget for the scroll area and add horizontal layout for centering
     QWidget *scrollContainer = new QWidget(this);
     QHBoxLayout *scrollContainerLayout = new QHBoxLayout(scrollContainer);
     scrollContainerLayout->addWidget(scrollArea);
 
-    // Set the initial directory path to the application directory
-    directoryPath = QCoreApplication::applicationDirPath() + "/configurations";
+    QSettings settings("Nebrija", "3Dprinting");
+    directoryPath = settings.value("saveSection/directoryPath", QCoreApplication::applicationDirPath() + "/configurations").toString();
+    qDebug() << "New directory path saved:" << directoryPath;
 
-    // Create and configure the change directory button
+    QMetaObject::invokeMethod(this, [this]() {
+            emit fileRoute(directoryPath);
+        }, Qt::QueuedConnection);
+
     changeDirectoryButton = new QPushButton(tr("Change Directory"), this);
     changeDirectoryButton->setFixedSize(140, 30);
     connect(changeDirectoryButton, &QPushButton::clicked, this, &SaveSection::changeDirectory);
 
-    // Add the change directory button to the main layout aligned to the left
     QHBoxLayout *buttonLayout = new QHBoxLayout();
     buttonLayout->addWidget(changeDirectoryButton, 0, Qt::AlignLeft);
 
-    // Create the main layout for the section
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
     mainLayout->addLayout(buttonLayout);
@@ -43,23 +41,19 @@ SaveSection::SaveSection(QWidget *parent) : QWidget(parent) {
     QSpacerItem *topSpacer = new QSpacerItem(50, 50, QSizePolicy::Minimum, QSizePolicy::Expanding);
     mainLayout->addItem(topSpacer);
 
-    // Instruction text and configuration
     instructionLabel = new QLabel(tr("Select Save Configuration"), this);
     instructionLabel->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(instructionLabel);
 
-    // Add spacers under instruction text
     QSpacerItem *spacer = new QSpacerItem(30, 30, QSizePolicy::Minimum, QSizePolicy::Expanding);
     mainLayout->addItem(spacer);
 
     mainLayout->addWidget(scrollContainer);
     setLayout(mainLayout);
 
-    // Create buttons
     createConfigurations();
 
-    // Apply styles
-    applyStyles(false);
+    applyStyles(true);
 }
 
 void SaveSection::retranslateUi() {
@@ -69,39 +63,41 @@ void SaveSection::retranslateUi() {
 
 void SaveSection::createConfigurations() {
     QDir directory(directoryPath);
-    // Get the list of .conf files in the directory
     QStringList confFiles = directory.entryList(QStringList() << "*.conf", QDir::Files);
 
-    // Clear the existing layout to remove any old configuration buttons
     clearLayout(layout);
 
-    // Loop through each configuration to create a new button for each configuration file
     for (const QString &fileName : confFiles) {
         QPushButton *button = new QPushButton(fileName, this);
         button->setFixedSize(200, 50);
         button->setProperty("isConfButton", true);
 
-        // Connect the button's clicked signal to a lambda function to handle the click event
         connect(button, &QPushButton::clicked, this, [this, fileName]() {
             onConfButtonClicked(fileName);
         });
 
-        // Add the button to the layout
         layout->addWidget(button);
     }
 
-    applyStyles(false);
 }
-
 void SaveSection::changeDirectory() {
-    // Open a file dialog to select a new directory
     QString newDirectory = QFileDialog::getExistingDirectory(this, tr("Select Directory"), directoryPath);
-    // If a new directory is selected, update the directory path and refresh the configurations
     if (!newDirectory.isEmpty()) {
         directoryPath = newDirectory;
+
+        QSettings settings("Nebrija", "3Dprinting");
+        settings.setValue("saveSection/directoryPath", directoryPath);
+
+        QString savedPath = settings.value("saveSection/directoryPath").toString();
+        qDebug() << "New directory path saved:" << savedPath;
+        emit fileRoute(savedPath);
+
         createConfigurations();
+    } else {
+        qDebug() << "No directory was selected.";
     }
 }
+
 
 void SaveSection::clearLayout(QLayout *layout) {
     QLayoutItem *child;
@@ -115,32 +111,26 @@ void SaveSection::clearLayout(QLayout *layout) {
 
 void SaveSection::onConfButtonClicked(const QString &fileName) {
     QString confFilePath = directoryPath + "/" + fileName;
-    // Copy the configuration file to the application's directory
     copyConfiguration(confFilePath);
     emit fileSelected(fileName);
-    emit nextSection();
+
 }
 
 void SaveSection::copyConfiguration(const QString &confFilePath) {
-    // Open the configuration file for reading
     QFile confFile(confFilePath);
     if (!confFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
     }
 
-    // Define the path to the target file where the configuration will be copied
     QString sectionValuesFilePath = QCoreApplication::applicationDirPath() + "/section_values.txt";
-    // Open the target file for writing
     QFile sectionValuesFile(sectionValuesFilePath);
     if (!sectionValuesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         return;
     }
 
-    // Create text streams for reading and writing
     QTextStream confStream(&confFile);
     QTextStream sectionValuesStream(&sectionValuesFile);
 
-    // Start a Python process to handle GCODE generation
     QProcess *process = new QProcess(this);
     QString currentPath = QDir::currentPath();
     QString pythonScriptPath = currentPath + "/axolotl_1mat.py";
@@ -151,15 +141,12 @@ void SaveSection::copyConfiguration(const QString &confFilePath) {
         qDebug() << "Failed to start Python script.";
     }
 
-    // Copy the contents of the configuration file to the target file
     sectionValuesStream << confStream.readAll();
     sectionValuesStream << "\n\n";
 
-    // Close both files
     sectionValuesFile.close();
     confFile.close();
 
-    // Read Section values from the file and emit the signal
     readSectionValues();
 }
 
@@ -242,6 +229,12 @@ void SaveSection::readSectionValues() {
     emit section3ValuesRead(methodIndex, infillValue, strandDistance);
     emit section4ValuesRead(section4Materials);
 }
+
+void SaveSection::clearSettings() {
+    QSettings settings;
+    settings.remove("saveSection/directoryPath");
+}
+
 
 // Aplica estilos a los widgets de la sección
 void SaveSection::applyStyles(bool darkMode) {

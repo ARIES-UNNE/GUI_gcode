@@ -64,10 +64,11 @@ private:
     bool darkModeEnabled;
 
     QString loadedConfigFileName;
+    QString loadedConfigFileRoute;
     bool changeDetected;
 
     // Method to write configuration to a file
-    bool writeConfigurationToFile(const QString &fileName);
+    bool writeConfigurationToFile(const QString &filePath, const QString &fileName);
 
 private slots:
     // Slot to move to the next section
@@ -90,6 +91,8 @@ private slots:
     void changeLanguage(const QString &languageCode);
 
     void updatePlateSize(const QVector2D &size);
+
+    void closeEvent(QCloseEvent *event);
 
 
 };

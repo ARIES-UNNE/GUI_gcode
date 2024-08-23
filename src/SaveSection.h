@@ -13,6 +13,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QSettings>
 
 // The SaveSection class provides an interface for selecting and managing save configurations.
 class SaveSection : public QWidget {
@@ -40,6 +41,11 @@ private:
 
     void readSectionValues();
 
+    void clearSettings();
+
+    bool darkMode;
+
+
 
 
     //  Styles
@@ -53,8 +59,9 @@ signals:
     void section3ValuesRead(int methodIndex, int infillValue, double strandDistance);
     void section4ValuesRead(const QList<QPair<QString, QString>> &materials);
 
-    void nextSection();
     void fileSelected(const QString &fileName);
+    void fileRoute(const QString &fileRoute);
+
 
 private slots:
     // funtion to change the directory
@@ -68,6 +75,7 @@ public slots:
     void copyConfiguration(const QString &confFilePath);
     void retranslateUi();
     void applyStyles(bool darkMode);
+
 };
 
 #endif // SAVESECTION_H

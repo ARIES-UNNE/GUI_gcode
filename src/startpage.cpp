@@ -1,45 +1,37 @@
 #include "startpage.h"
 
 SectionStart::SectionStart(QWidget *parent) : QWidget(parent) {
-    // Crear el combo box para la selección de idioma
     languageComboBox = new QComboBox(this);
     languageComboBox->addItem("English", "en");
     languageComboBox->addItem("Español", "es");
 
-    // Conectar la señal de cambio de texto del combo box
     connect(languageComboBox, &QComboBox::currentTextChanged, this, [this](const QString &text) {
         QString languageCode = languageComboBox->currentData().toString();
         emit languageChanged(languageCode);
     });
 
-    // Crear una etiqueta de bienvenida
     welcomeLabel = new QLabel(tr("3D Printing App for GCODE Generation"), this);
     welcomeLabel->setAlignment(Qt::AlignCenter);
 
-    // Crear un botón de inicio
     startButton = new QPushButton(tr("Start"), this);
 
-    // Conectar la señal de clic del botón de inicio
     connect(startButton, &QPushButton::clicked, this, &SectionStart::startButtonClicked);
 
-    // Crear un layout horizontal para colocar el combo box en la parte superior izquierda
     QHBoxLayout *topLayout = new QHBoxLayout();
     topLayout->addWidget(languageComboBox, 0, Qt::AlignLeft);
-    topLayout->addStretch();  // Añadir un estiramiento para empujar el combo box hacia la izquierda
+    topLayout->addStretch();
 
-    // Crear un layout vertical principal
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->addLayout(topLayout);
     mainLayout->addStretch();
     mainLayout->addWidget(welcomeLabel, 0, Qt::AlignCenter);
 
-    // Añadir un espaciador entre el welcomeLabel y el startButton
     mainLayout->addSpacerItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
     mainLayout->addWidget(startButton, 0, Qt::AlignCenter);
     mainLayout->addStretch();
 
-    setLayout(mainLayout);  // Establecer el layout principal para el widget
+    setLayout(mainLayout);
 }
 
 void SectionStart::retranslateUi() {

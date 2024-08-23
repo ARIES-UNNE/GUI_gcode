@@ -47,10 +47,9 @@ QPointF OpenGLWidget::getArrowDirection() const {
     qreal length = qSqrt(direction.x() * direction.x() + direction.y() * direction.y());
 
     if (length == 0.0) {
-        return QPointF(0.0, 0.0); // Avoid division by zero
+        return QPointF(0.0, 0.0);
     }
 
-    // Normalize the direction vector
     return QPointF(direction.x() / length, direction.y() / length);
 }
 
@@ -94,7 +93,6 @@ void OpenGLWidget::updateMovementLimits() {
     movementLimits.top = 100.0f * zoomFactor;
 }
 
-
 void OpenGLWidget::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -124,23 +122,6 @@ void OpenGLWidget::paintGL() {
     glVertex3f(0.0f, plateY, 0.0f);
     glEnd();
 
-    // Dibuja las marcas de los ejes
-    glColor3f(1.0f, 1.0f, 1.0f); // Color blanco
-    glBegin(GL_LINES);
-    for (float x = 0.0f; x <= plateX; x += 10.0f) {
-        if (x != 0.0f) {
-            glVertex3f(x, 2.0f, 0.0f);
-            glVertex3f(x, -2.0f, 0.0f);
-        }
-    }
-    for (float y = 0.0f; y <= plateY; y += 10.0f) {
-        if (y != 0.0f) {
-            glVertex3f(2.0f, y, 0.0f);
-            glVertex3f(-2.0f, y, 0.0f);
-        }
-    }
-    glEnd();
-
     // Dibuja el borde del plato (cuadrado)
     glColor3f(1.0f, 1.0f, 1.0f); // Color blanco
     glBegin(GL_LINE_LOOP);
@@ -150,16 +131,23 @@ void OpenGLWidget::paintGL() {
     glVertex3f(0.0f, plateY, 0.0f);
     glEnd();
 
-    // Dibuja las líneas de datos después de la cuadrícula
-    glColor3f(0.0f, 1.0f, 0.0f); // Color verde
-    glBegin(GL_LINES);
-    for (size_t i = 1; i < vertices.size(); ++i) {
-        glVertex3f(vertices[i-1].x(), vertices[i-1].y(), vertices[i-1].z());
-        glVertex3f(vertices[i].x(), vertices[i].y(), vertices[i].z());
-    }
-    glEnd();
+    // Dibuja las líneas de datos con colores específicos
+    for (const LineSegment &segment : lineSegments) {
+        QColor color = segment.color;
+        glColor3f(color.redF(), color.greenF(), color.blueF()); // Convertir QColor a flotantes
 
-    // Dibuja el texto del nivel de zoom usando QPainter
+        // Ajusta el grosor de la línea
+        glLineWidth(segment.thickness);
+
+        glBegin(GL_LINES);
+        glVertex3f(segment.start.x(), segment.start.y(), 0.0f);
+        glVertex3f(segment.end.x(), segment.end.y(), 0.0f);
+        glEnd();
+    }
+
+    // Restaura el grosor de la línea al valor predeterminado
+    glLineWidth(1.0f);
+
     QPainter painter(this);
     painter.setPen(Qt::white);
     painter.setFont(QFont("Arial", 12));
@@ -171,35 +159,27 @@ void OpenGLWidget::paintGL() {
     drawDirectionArrow(painter);
 }
 
+
 void OpenGLWidget::drawDirectionArrow(QPainter &painter) const {
-    // Obtiene la dirección de la flecha
     QPointF arrowDirection = getArrowDirection();
     float arrowLength = 25.0f;
 
-    // Configura el color y el pincel para la flecha
     painter.setPen(Qt::green);
     painter.setBrush(Qt::green);
 
-    // Calcula el ángulo de rotación en radianes
     float angle = std::atan2(arrowDirection.y(), arrowDirection.x());
 
-    // Posición de la flecha
     QPointF center(width() - 140, 30);
 
-    // Guarda el estado del transformador
     painter.save();
 
-    // Mueve el transformador al centro de la flecha
     painter.translate(center);
 
-    // Rota el transformador por el ángulo calculado
     painter.rotate(-angle * 180.0 / M_PI);
 
-    // Dibuja el palito de la flecha
     QLineF line(-arrowLength, 0, 0, 0);
     painter.drawLine(line);
 
-    // Dibuja la punta de la flecha
     QPolygonF arrowHead;
     arrowHead << QPointF(-10, -5)
               << QPointF(0, 0)
@@ -207,9 +187,9 @@ void OpenGLWidget::drawDirectionArrow(QPainter &painter) const {
 
     painter.drawPolygon(arrowHead);
 
-    // Restaura el estado original del transformador
     painter.restore();
 }
+
 
 
 void OpenGLWidget::parseGCode(const QString &filePath) {
@@ -219,26 +199,79 @@ void OpenGLWidget::parseGCode(const QString &filePath) {
     }
 
     QTextStream in(&file);
-    float x = 0, y = 0, z = 0;
+    float x = 0, y = 0, e = 0;
+    bool hasPosition = false;
+
     vertices.clear();
+    lineSegments.clear();
+
+    const float thicknessScale = 2.0f; // Factor de escala para el grosor
+
     while (!in.atEnd()) {
-        QString line = in.readLine();
+        QString line = in.readLine().trimmed();
+        if (line.isEmpty() || line.startsWith(';')) {
+            continue; // Ignora comentarios y líneas vacías
+        }
+
         if (line.startsWith("G1")) {
+            QStringList tokens = line.split(' ');
+            float newX = x, newY = y, newE = e;
+            bool foundX = false, foundY = false, foundE = false;
+
+            for (const QString &token : tokens) {
+                if (token.startsWith('X')) {
+                    newX = token.mid(1).toFloat();
+                    foundX = true;
+                } else if (token.startsWith('Y')) {
+                    newY = token.mid(1).toFloat();
+                    foundY = true;
+                } else if (token.startsWith('E')) {
+                    newE = token.mid(1).toFloat();
+                    foundE = true;
+                }
+            }
+
+            // Procesar la línea solo si tiene extrusión (E)
+            if (foundE && (foundX || foundY)) {
+                if (hasPosition) {
+                    LineSegment segment;
+                    segment.start = QPointF(x, y);
+                    segment.end = QPointF(newX, newY);
+                    segment.color = materialColors.value(currentMaterialCode, Qt::green); // Color por defecto
+                    segment.thickness = (newE - e) * thicknessScale; // Aplicar el factor de escala
+                    if (segment.thickness < 1.0f) segment.thickness = 1.0f; // Grosor mínimo
+                    lineSegments.push_back(segment);
+                }
+
+                x = newX;
+                y = newY;
+                e = newE;
+                hasPosition = true;
+            }
+        } else if (line.startsWith("G0")) {
             QStringList tokens = line.split(' ');
             for (const QString &token : tokens) {
                 if (token.startsWith('X')) {
                     x = token.mid(1).toFloat();
                 } else if (token.startsWith('Y')) {
                     y = token.mid(1).toFloat();
-                } else if (token.startsWith('Z')) {
-                    z = token.mid(1).toFloat();
                 }
             }
-            vertices.emplace_back(x, y, z);
+            hasPosition = true;
+        } else if (line.startsWith("T")) {
+            // Cambio de material
+            QString materialCode = line.section(' ', 0, 0);
+            if (!materialColors.contains(materialCode)) {
+                QColor newColor = QColor(rand() % 256, rand() % 256, rand() % 256);
+                materialColors[materialCode] = newColor;
+            }
+            currentMaterialCode = materialCode;
         }
     }
     file.close();
 }
+
+
 
 bool OpenGLWidget::fileModified() {
     QFile file(filePath);
@@ -327,5 +360,28 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent *event) {
 void OpenGLWidget::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         setCursor(Qt::ArrowCursor);
+    }
+}
+
+// OPCIONAL
+ // Actualiza la interfaz de usuario aquí
+void OpenGLWidget::addMaterial(const QString &code, const QColor &color) {
+    materialColors[code] = color;
+}
+
+void OpenGLWidget::removeMaterial(const QString &code) {
+    materialColors.remove(code);
+
+}
+
+void OpenGLWidget::setMaterialColor(const QString &code, const QColor &color) {
+    if (materialColors.contains(code)) {
+        materialColors[code] = color;
+    }
+}
+
+void OpenGLWidget::setCurrentMaterial(const QString &code) {
+    if (materialColors.contains(code)) {
+        currentMaterialCode = code;
     }
 }

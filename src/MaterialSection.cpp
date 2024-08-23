@@ -8,14 +8,14 @@ MaterialSection::MaterialSection(QWidget *parent) : QWidget(parent) {
     numMaterialsSpinBox->setObjectName("numMaterialsSpinBox");
     numMaterialsSpinBox->setRange(0, 100);
 
+    connect(numMaterialsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MaterialSection::updateMaterialNames);
+
     sectionTitle = new QLabel(tr("Number of Materials"), this);
     sectionTitle->setObjectName("plateSizeLabel4");
 
     QVBoxLayout *section4Layout = new QVBoxLayout(MaterialSectionWidget);
     section4Layout->setAlignment(Qt::AlignTop);
     MaterialSectionWidget->setLayout(section4Layout);
-
-    connect(numMaterialsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MaterialSection::updateMaterialNames);
 
     section4Layout->addWidget(sectionTitle);
     section4Layout->addWidget(numMaterialsSpinBox);
@@ -28,11 +28,11 @@ MaterialSection::MaterialSection(QWidget *parent) : QWidget(parent) {
     headerContainer->setObjectName("headerContainer");
     QHBoxLayout *headerLayout = new QHBoxLayout(headerContainer);
 
-    headerLabel1 = new QLabel(tr("Material"), this);
+    headerLabel1 = new QLabel(tr("Tecnology"), this);
     headerLabel1->setObjectName("headerLabel");
-    headerLabel2 = new QLabel(tr("Nozzle"), this);
+    headerLabel2 = new QLabel(tr("Filament µm"), this);
     headerLabel2->setObjectName("headerLabel");
-    headerLabel3 = new QLabel(tr("Filament µm"), this);
+    headerLabel3 = new QLabel(tr("Nozzle"), this);
     headerLabel3->setObjectName("headerLabel");
 
     headerLayout->addItem(new QSpacerItem(10, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
@@ -107,7 +107,7 @@ void MaterialSection::updateMaterialNames(int numMaterials) {
 
         QComboBox *materialComboBox = new QComboBox(this);
         materialComboBox->setObjectName("materialComboBox");
-        materialComboBox->addItem(tr("No Previous Tec"));
+        materialComboBox->addItem(tr("Custom"));
         materialComboBox->addItem(tr("FDM - Granza"));
         materialComboBox->addItem(tr("FDM - Cartridge"));
         materialComboBox->addItem(tr("Extrusión de Pasta"));
@@ -256,7 +256,7 @@ void MaterialSection::updateMaterialSection(const QList<QPair<QString, QString>>
 
         QComboBox *materialComboBox = new QComboBox(this);
         materialComboBox->setObjectName("materialComboBox");
-        materialComboBox->addItem(tr("No Previous Tec"));
+        materialComboBox->addItem(tr("Custom"));
         materialComboBox->addItem(tr("FDM - Granza"));
         materialComboBox->addItem(tr("FDM - Cartridge"));
         materialComboBox->addItem(tr("Extrusión de Pasta"));

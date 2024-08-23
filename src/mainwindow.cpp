@@ -12,19 +12,23 @@
 #include <QApplication>
 
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(false), changeDetected(false)
+/**
+ * @brief Constructor for MainWindow class.
+ *
+ * Initializes the main window and sets up the user interface, including layouts,
+ * sections, buttons, and connections between signals and slots.
+ *
+ * @param parent Pointer to the parent widget.
+ */
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),  changeDetected(false)
  {
-    // Create a central widget for the main window
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
 
-    // Set size for all app
     setFixedSize(700, 600);
     darkModeEnabled = true;
-    // Create the main horizontal layout
     QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
 
-    // Create layout for sections and buttons
     QVBoxLayout *sectionsLayout = new QVBoxLayout();
 
     // Start section
@@ -36,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(f
 
     // Section 0: Save configuration
     SaveSection *SaveSectionWidget = new SaveSection(this);
-    connect(SaveSectionWidget, &SaveSection::nextSection, this, [this]() {
+    connect(SaveSectionWidget, &SaveSection::fileSelected, this, [this]() {
         nextSection();  // Move to the next section
         changeDetected = false;
     });
@@ -104,11 +108,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(f
         saveConfigurationToFile();
     });
 
-    connect(SaveSectionWidget, &SaveSection::fileSelected, this, [this](const QString &fileName) {
-        loadedConfigFileName = fileName;
-    });
-
-
     // Create button to toggle dark mode
     toggleDarkModeButton = new QPushButton(tr("Light Mode"), this);
     connect(toggleDarkModeButton, &QPushButton::clicked, this, &MainWindow::toggleDarkMode);
@@ -164,6 +163,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), darkModeEnabled(f
         RealTimeGCODE();
         changeDetected = true;
     });
+
+
+    connect(SaveSectionWidget, &SaveSection::fileSelected, this, [this](const QString &fileName) {
+        loadedConfigFileName = fileName;
+    });
+
+    connect(SaveSectionWidget, &SaveSection::fileRoute, this, [this](const QString &fileRoute) {
+        loadedConfigFileRoute = fileRoute;
+    });
+
 
     // Initially hide the buttons and OpenGL widget
     nextButton->setVisible(false);
@@ -267,12 +276,9 @@ void MainWindow::applyLightMode() {
 void MainWindow::applyDarkMode() {
     setStyleSheet(
         "MainWindow { background-color: #1a1a1a; }"
-        "QPushButton { "
-        "background-color: #2a2a2a; "
-        "color: white; "
+        "QPushButton { border: 1px solid #2a2a2a;"
         "border-radius: 5px; "
-        "padding: 10px;"
-        "}"
+        "padding: 6px;""}"
         "QPushButton:hover { background-color: #001900; border: 1px solid #4CAF50; }"
         "QWidget { background-color: #1a1a1a; color: #ffffff; }"
         );
@@ -334,6 +340,13 @@ void MainWindow::cancelConfirmation() {
 // Show the previous section
 void MainWindow::previousSection() {
     int prevIndex = stackedWidget->currentIndex() - 1;
+
+    // Condición para evitar retroceder al saveSection si hay un archivo cargado
+    if (!loadedConfigFileName.isEmpty() && prevIndex == 1) {
+        QMessageBox::warning(this, "Action Restricted", "You cannot go back to this section as a configuration file is loaded.");
+        return;
+    }
+
     if (prevIndex >= 1) {
         sectionConfiguration(prevIndex);
         stackedWidget->setCurrentIndex(prevIndex);
@@ -347,13 +360,11 @@ void MainWindow::nextSection() {
         reply = QMessageBox::question(this, "Update Configuration", "You have made a change. Do you want to update it?",
                                       QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes) {
-            // Llamar a saveConfigurationToFile con el archivo cargado
-            QFileInfo fileInfo(loadedConfigFileName);
-            QString baseFileName = fileInfo.baseName(); // Para ejemplo, podrías extraer información relevante del nombre del archivo
-            writeConfigurationToFile(loadedConfigFileName);
+            writeConfigurationToFile(loadedConfigFileRoute,loadedConfigFileName);
         }
         changeDetected = false;
     }
+
 
     int nextIndex = stackedWidget->currentIndex() + 1;
     if (nextIndex < stackedWidget->count()) {
@@ -374,24 +385,23 @@ void MainWindow::executePython() {
     }
 }
 
-// Save the configuration to a file
 void MainWindow::saveConfigurationToFile() {
-    QString directoryPath = QCoreApplication::applicationDirPath() + "/configurations";
+    QString directoryPath = QCoreApplication::applicationDirPath();
 
-    if (writeConfigurationToFile("section_values.txt")) {
-        QMessageBox::information(this, "Configuration Saved", "Configuration saved to section_values.txt.");
-    } else {
-        QMessageBox::critical(this, "Error", "Failed to save configuration to section_values.txt.");
-    }
 
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Save Configuration", "Do you want to save this configuration?",
                                   QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        QString fileName = QFileDialog::getSaveFileName(this, "Save Configuration", directoryPath, "Configuration Files (*.conf)");
-        if (!fileName.isEmpty()) {
-            if (writeConfigurationToFile(fileName)) {
+        QString fullFilePath = QFileDialog::getSaveFileName(this, "Save Configuration", loadedConfigFileRoute, "Configuration Files (*.conf)");
+
+        if (!fullFilePath.isEmpty()) {
+            QFileInfo fileInfo(fullFilePath);
+            QString saveDirectory = fileInfo.absolutePath();  // Path to the directory
+            QString fileName = fileInfo.fileName();  // Just the file name
+
+            if (writeConfigurationToFile(saveDirectory, fileName)) {
                 QMessageBox::information(this, "Configuration Saved", "Configuration saved successfully.");
             } else {
                 QMessageBox::critical(this, "Error", "Failed to save configuration to file.");
@@ -402,9 +412,11 @@ void MainWindow::saveConfigurationToFile() {
     executePython();
 }
 
-// Write the configuration to a file
-bool MainWindow::writeConfigurationToFile(const QString &fileName) {
-    QFile file(fileName);
+
+bool MainWindow::writeConfigurationToFile(const QString &filePath, const QString &fileName) {
+    QString fullPath = filePath + "/" + fileName;
+
+    QFile file(fullPath);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
 
@@ -446,7 +458,8 @@ bool MainWindow::writeConfigurationToFile(const QString &fileName) {
 
 // Update GCODE in real-time
 void MainWindow::RealTimeGCODE() {
-    writeConfigurationToFile("section_values.txt");
+    QString directoryPath = QCoreApplication::applicationDirPath();
+    writeConfigurationToFile(directoryPath, "section_values.txt");
     executePython();
 }
 
@@ -454,4 +467,17 @@ void MainWindow::updatePlateSize(const QVector2D &size) {
     if (openGLWidget) {
         openGLWidget->setPlateSize(static_cast<int>(size.x()), static_cast<int>(size.y()));
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+    // Ruta del archivo a eliminar
+    QString directoryPath = QCoreApplication::applicationDirPath();
+    QString gcodeFilePath = directoryPath + "/Axo3_1mat.gcode";
+
+    // Comprobar si el archivo existe y eliminarlo
+    if (QFile::exists(gcodeFilePath)) {
+        QFile::remove(gcodeFilePath);
+    }
+
+    QMainWindow::closeEvent(event);
 }

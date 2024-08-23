@@ -5,6 +5,12 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QCoreApplication>
+#include <QFileDialog>
+#include <QFile>
+#include <QMessageBox>
+#include <QDir>
+
 
 // The GenerateSection class for the fibak generation section of the UI
 class GenerateSection : public QWidget
@@ -18,6 +24,7 @@ public:
 private:
     QLabel *completionLabel;
     QPushButton *generateButton;
+    QPushButton *saveGcodeButton;
 
 signals:
     void generateGcode();
@@ -25,6 +32,9 @@ signals:
 public slots:
     void retranslateUi();
     void applyStyles(bool darkMode);
+
+private slots:
+    void saveGcode();
 
 };
 
