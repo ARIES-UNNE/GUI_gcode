@@ -15,6 +15,11 @@ Utiliza principalmente las librerias de "QOpenGL" y "QWidget" además de "Math" 
 ![image](https://github.com/user-attachments/assets/661bfd86-a36b-47c9-a3d0-bf20a6b41690)
 
 
+La generación de los G-CODES se realiza mediante el siguiente Script de Python: 
+
+Se puede consultar la documentacón doxygen dentro de la release
+
+
 ## Requisitos
 
 No es necesario descargar programas o librerías externas.
