@@ -21,6 +21,7 @@ No es necesario descargar programas o librerías externas.
 Instrucciones de Instalación:
 
 Para ejecutar la aplicación, descarga el archivo release y ejecuta el .exe de la aplicación.
+Release: https://github.com/ARIES-UNNE/GUI_gcode/releases
 
 
 Clonar el repositorio:
