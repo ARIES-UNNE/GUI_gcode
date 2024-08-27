@@ -1,6 +1,7 @@
 # Generador de G-Codes
 
 Este proyecto es una aplicación desarrollada con Qt y Python que permite generar códigos G (G-codes) para aplicaciones de bioimpresión en el control de máquinas CNC.
+Utiliza principalmente las librerias de "QOpenGL" y "QWidget" además de "Math" para el archivo Python.
 
 ## Características
 
@@ -38,6 +39,7 @@ git clone https://github.com/ARIES-UNNE/GUI_gcode.git
 
 4. Guardar configuración de guardado:
    - Puedes guardar los parámetros establecidos mediante el botón "CREATE SAVE CONFIG", estos se pueden cargar nuevamente en la aplicación, en la primera ventana.
+   ![image](https://github.com/user-attachments/assets/42ec3c3a-359a-4b02-b5a2-752fbad01bc0)
 
 
 ## Créditos
@@ -45,7 +47,7 @@ git clone https://github.com/ARIES-UNNE/GUI_gcode.git
 - Desarrollador Principal: Carlos Barquín Mazuela (https://github.com/CarlosBarquin)
 - Colaboradores: Nieves Cubo Mateo (https://github.com/Nicuma3)
   
-Este proyecto se desarrolló como parte de [nombre del proyecto o institución, si aplica].
+Este proyecto se desarrolló como parte del Grupo de Investigación ARIES.
 
 
 ## Licencia
