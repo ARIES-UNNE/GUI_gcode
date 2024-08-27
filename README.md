@@ -15,15 +15,6 @@ Utiliza principalmente las librerias de "QOpenGL" y "QWidget" además de "Math" 
 ![image](https://github.com/user-attachments/assets/661bfd86-a36b-47c9-a3d0-bf20a6b41690)
 
 
-- La generación de los G-CODES se realiza mediante el siguiente Script de Python: https://github.com/ARIES-UNNE/GUI_gcode/blob/main/axolotl_2mat.py
-
-- Ejemplo del G-CODE que se genera a partir del generador: https://github.com/ARIES-UNNE/GUI_gcode/blob/main/Axo3_1mat.gcode
-
-- El reporsitorio cuenta con versiones anteriores del Genreador de G-CODES como: https://github.com/ARIES-UNNE/GUI_gcode/blob/main/axolotl_1mat.py 
-
-- Se puede consultar la documentacón doxygen dentro de la release
-
-
 ## Requisitos
 
 No es necesario descargar programas o librerías externas.
@@ -58,6 +49,16 @@ git clone https://github.com/ARIES-UNNE/GUI_gcode.git
 
 ![image](https://github.com/user-attachments/assets/f31ce658-f437-4cad-8603-a1000d499172)
 
+
+## Recursos Adicionales:
+
+- La generación de los G-CODES se realiza mediante el siguiente Script de Python: [axolotl_2mat.py](https://github.com/ARIES-UNNE/GUI_gcode/blob/main/axolotl_2mat.py)
+
+- Ejemplo del G-CODE que se genera a partir del generador: [Axo3_1mat.gcode](https://github.com/ARIES-UNNE/GUI_gcode/blob/main/Axo3_1mat.gcode)
+
+- El repositorio cuenta con versiones anteriores del Generador de G-CODES como: [axolotl_1mat.py](https://github.com/ARIES-UNNE/GUI_gcode/blob/main/axolotl_1mat.py)
+
+- Se puede consultar la documentación doxygen dentro de la release.
 
 
 ## Créditos
