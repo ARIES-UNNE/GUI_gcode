@@ -12,6 +12,9 @@ Utiliza principalmente las librerias de "QOpenGL" y "QWidget" además de "Math" 
 - Soporte para varios idiomas y temas.
 - Compatible con Windows.
 
+![image](https://github.com/user-attachments/assets/661bfd86-a36b-47c9-a3d0-bf20a6b41690)
+
+
 ## Requisitos
 
 No es necesario descargar programas o librerías externas.
@@ -39,7 +42,10 @@ git clone https://github.com/ARIES-UNNE/GUI_gcode.git
 
 4. Guardar configuración de guardado:
    - Puedes guardar los parámetros establecidos mediante el botón "CREATE SAVE CONFIG", estos se pueden cargar nuevamente en la aplicación, en la primera ventana.
-   ![image](https://github.com/user-attachments/assets/42ec3c3a-359a-4b02-b5a2-752fbad01bc0)
+   
+
+![image](https://github.com/user-attachments/assets/f31ce658-f437-4cad-8603-a1000d499172)
+
 
 
 ## Créditos
