@@ -33,6 +33,9 @@ git clone https://github.com/ARIES-UNNE/GUI_gcode.git
 
 1. Ejecutar la aplicación:
    - Abre la aplicación ejecutando el archivo .exe descargado desde el release.
+
+![image](https://github.com/user-attachments/assets/6bd80083-41db-45e6-ab6e-ea32c1004b21)
+
    
 2. Configurar los parámetros:
    - En la interfaz, ingresa los parámetros necesarios para la generación del G-CODE deseado. 
