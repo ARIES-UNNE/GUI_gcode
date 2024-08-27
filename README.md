@@ -1,9 +1,8 @@
-Generador de G-Codes
+# Generador de G-Codes
 
 Este proyecto es una aplicación desarrollada con Qt y Python que permite generar códigos G (G-codes) para aplicaciones de bioimpresión en el control de máquinas CNC.
 
-
-Características:
+## Características
 
 - Interfaz de usuario desarrollada con Qt.
 - Generación de G-CODES personalizados.
@@ -12,24 +11,21 @@ Características:
 - Soporte para varios idiomas y temas.
 - Compatible con Windows.
 
-
-Requisitos:
+## Requisitos
 
 No es necesario descargar programas o librerías externas.
 
+## Instrucciones de Instalación
 
-Instrucciones de Instalación:
+- Para ejecutar la aplicación, descarga el archivo release y ejecuta el `.exe` de la aplicación.
+- Release: [https://github.com/ARIES-UNNE/GUI_gcode/releases](https://github.com/ARIES-UNNE/GUI_gcode/releases)
 
-- Para ejecutar la aplicación, descarga el archivo release y ejecuta el .exe de la aplicación.
-- Release: https://github.com/ARIES-UNNE/GUI_gcode/releases
-
-
-Clonar el repositorio:
+## Clonar el repositorio
 
 git clone https://github.com/ARIES-UNNE/GUI_gcode.git
 
 
-Uso:
+## Uso:
 
 1. Ejecutar la aplicación:
    - Abre la aplicación ejecutando el archivo .exe descargado desde el release.
@@ -44,10 +40,15 @@ Uso:
    - Puedes guardar los parámetros establecidos mediante el botón "CREATE SAVE CONFIG", estos se pueden cargar nuevamente en la aplicación, en la primera ventana.
 
 
-Créditos
+## Créditos
 
 - Desarrollador Principal: Carlos Barquín Mazuela (https://github.com/CarlosBarquin)
 - Colaboradores: Nieves Cubo Mateo (https://github.com/Nicuma3)
   
 Este proyecto se desarrolló como parte de [nombre del proyecto o institución, si aplica].
+
+
+## Licencia
+
+Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
 
