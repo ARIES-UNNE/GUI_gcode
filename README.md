@@ -66,7 +66,7 @@ git clone https://github.com/ARIES-UNNE/GUI_gcode.git
 - Desarrollador Principal: Carlos Barquín Mazuela (https://github.com/CarlosBarquin)
 - Colaboradores: Nieves Cubo Mateo (https://github.com/Nicuma3)
   
-Este proyecto se desarrolló como parte del Grupo de Investigación ARIES.
+Este proyecto se desarrolló como parte del Departamento de Informática para el grupo de Investigación ARIES.
 
 
 ## Licencia
