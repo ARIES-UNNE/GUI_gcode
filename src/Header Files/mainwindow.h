@@ -187,6 +187,8 @@ private:
      */
     bool writeConfigurationToFile(const QString &filePath, const QString &fileName);
 
+    bool errorShown;
+
 private slots:
     /**
      * @brief Slot para pasar a la siguiente sección.

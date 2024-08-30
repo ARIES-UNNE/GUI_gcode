@@ -457,15 +457,31 @@ void MainWindow::nextSection() {
  * Esta función inicia el .exe que contiene el script de Python con el Generador de GCODES.
  */
 void MainWindow::executePython() {
-    QProcess *process = new QProcess(this);  // Crear un nuevo proceso
-    QString currentPath = QCoreApplication::applicationDirPath();  // Obtener la ruta del directorio actual
+    QProcess *process = new QProcess(this);
+    QString currentPath = QDir::currentPath();
     QString exePath = currentPath + "/axolotl_1mat.exe";  // Ruta del archivo .exe
+
+    // Restablecer la bandera antes de iniciar el proceso
+    this->errorShown = false;
+
+    // Conectar para manejar errores y salida estándar de error
+    connect(process, &QProcess::errorOccurred, this, [this](QProcess::ProcessError){
+        if (!this->errorShown) {
+            this->errorShown = true;  // Marcar que se mostró el error
+            QMessageBox::critical(nullptr, "Error de ejecución", "Algunos parámetros son incompatibles.");
+        }
+    });
+
+    // Conectar para capturar cualquier salida de error del proceso .exe
+    connect(process, &QProcess::readyReadStandardError, this, [this, process](){
+        QByteArray errorOutput = process->readAllStandardError();
+        if (!errorOutput.isEmpty() && !this->errorShown) {
+            this->errorShown = true;  // Marcar que se mostró el error
+            QMessageBox::critical(nullptr, "Error de ejecución", "Algunos parámetros son incompatibles.");
+        }
+    });
+
     process->start(exePath);  // Iniciar el proceso con el archivo .exe
-    if (process->waitForStarted()) {
-        qDebug() << "Executable started successfully.";
-    } else {
-        qDebug() << "Failed to start executable.";
-    }
 }
 
 /**
@@ -520,6 +536,7 @@ bool MainWindow::writeConfigurationToFile(const QString &filePath, const QString
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);  // Crear un flujo de texto para escribir en el archivo
 
+        // Se almacenan los valores literales y sus versiones con las magnitudes correctas para el generador
         // Valores de la sección 1 DimensionSection
         out << "Section1 Values:\n";
         out << "Plate X Value: " << DimensionSectionWidget->getPlateXSpinBox() << "\n";
@@ -529,24 +546,38 @@ bool MainWindow::writeConfigurationToFile(const QString &filePath, const QString
 
         // Valores de la sección 2 ShapeSection
         out << "Section2 Values:\n";
+        int shapeIndex1 = ShapeSectionWidget->getShapeIndex1();
+        // Escribe "S" si el índice es 1, o "C" si el índice es 0
+        out << "Shape: " << (shapeIndex1 == 1 ? "S" : "C") << "\n";
+        out << "Shape Index: " << ShapeSectionWidget->getShapeIndex1() << "\n";
         out << "Size 1: " << ShapeSectionWidget->getSize1() << "\n";
-        out << "Size 2: " << ShapeSectionWidget->getSize2() << "\n";
-        out << "Shape Index 1: " << ShapeSectionWidget->getShapeIndex1() << "\n";
-        out << "Shape Index 2: " << ShapeSectionWidget->getShapeIndex2() << "\n\n";
+        out << "Dimension Index: " << ShapeSectionWidget->getShapeIndex2() << "\n";
+        out << "Size 2: " << ShapeSectionWidget->getSize2() << "\n\n";
 
         // Valores de la sección 3 InfillSection
         out << "Section3 Values:\n";
-        out << "Infill Value: " << infillSectionWidget->getInfillValue() << "\n";
-        out << "Shape Index: " << infillSectionWidget->getShapeIndex() << "\n";
+        out << "Infill Index: " << infillSectionWidget->getShapeIndex() << "\n";
+        double infillValueDecimal = infillSectionWidget->getInfillValue() / 100.0;
+        out << "Infill Value decimal: " << infillValueDecimal << "\n";
+        out << "Infill Value percentaje: " << infillSectionWidget->getInfillValue() << "\n";
         out << "Strand Distance Value: " << infillSectionWidget->getStrandDistanceValue() << "\n\n";
 
         // Valores de la sección 4 MaterialSection
         out << "Section4 Values:\n";
         QList<MaterialConfig> materialConfigs = materialSectionWidget->getMaterialConfigs();
+
+        out << "Total Materials: " << materialConfigs.size() << "\n\n";
+
+        int index = 0;
         for (const auto& materialConfig : materialConfigs) {
+            out << "Material Name (" << index << "): " << materialConfig.name << "\n";
+            out << "Filament (" << index << "): " << materialConfig.filament << "\n";
+            out << "Nozzle (" << index << "): " << materialConfig.nozzle << "\n";
             out << "Material Name: " << materialConfig.name << "\n";
-            out << "Filament: " << materialConfig.filament << "\n";
-            out << "Nozzle: " << materialConfig.nozzle << "\n" << "\n";
+            out << "FullFilament: " << materialConfig.filamentSave << "\n";
+            out << "FullNozzle: " << materialConfig.nozzleSave << "\n" << "\n";
+
+            ++index;
         }
 
         file.close();  // Cerrar el archivo
@@ -581,24 +612,32 @@ void MainWindow::updatePlateSize(const QVector2D &size) {
         openGLWidget->setPlateSize(static_cast<int>(size.x()), static_cast<int>(size.y()));  // Actualizar el tamaño de la placa
     }
 }
-
 /**
  * @brief Manejar el evento de cierre de la ventana principal.
  *
  * Esta función se activa cuando se cierra la ventana principal. Asegura
- * de que el archivo GCODE sea eliminado si existe para resetearlo.
+ * de que el archivo GCODE y el archivo section_values sean eliminados si existen para resetearlos.
  *
  * @param event El objeto QCloseEvent que representa el evento de cierre.
  */
 void MainWindow::closeEvent(QCloseEvent *event) {
-    // Ruta al archivo GCODE que se debe eliminar
+    // Ruta al directorio de la aplicación
     QString directoryPath = QCoreApplication::applicationDirPath();
-    QString gcodeFilePath = directoryPath + "/Axo3_1mat.gcode";
 
-    // Comprobar si el archivo existe y eliminarlo
+    // Rutas a los archivos que se deben eliminar
+    QString gcodeFilePath = directoryPath + "/Axo3_1mat.gcode";
+    QString sectionValuesFilePath = directoryPath + "/section_values.txt";
+
+    // Comprobar si el archivo GCODE existe y eliminarlo
     if (QFile::exists(gcodeFilePath)) {
         QFile::remove(gcodeFilePath);
     }
 
-    QMainWindow::closeEvent(event);  // Llamar al manejador de eventos de cierre de la ventana principal
+    // Comprobar si el archivo section_values.txt existe y eliminarlo
+    if (QFile::exists(sectionValuesFilePath)) {
+        QFile::remove(sectionValuesFilePath);
+    }
+
+    // Llamar al manejador de eventos de cierre de la ventana principal
+    QMainWindow::closeEvent(event);
 }

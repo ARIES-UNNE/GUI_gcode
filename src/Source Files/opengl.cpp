@@ -313,7 +313,7 @@ void OpenGLWidget::parseGCode(const QString &filePath) {
     vertices.clear(); // Limpiar la lista de vértices
     lineSegments.clear(); // Limpiar la lista de segmentos de línea
 
-    const float thicknessScale = 2.0f; // Factor de escala para el grosor
+    const float thicknessScale = 0.5f; // Factor de escala para el grosor
 
     while (!in.atEnd()) {
         QString line = in.readLine().trimmed();

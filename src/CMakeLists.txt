@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(TFGlenguage VERSION 0.1 LANGUAGES CXX)
+project(TFGGcodeApp VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -44,32 +44,32 @@ set(PROJECT_SOURCES
 
 # Añadir ejecutable según la versión de Qt
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(TFGlenguage
+    qt_add_executable(TFGGcodeApp
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
 else()
     if(ANDROID)
-        add_library(TFGlenguage SHARED
+        add_library(TFGGcodeApp SHARED
             ${PROJECT_SOURCES}
         )
     else()
-        add_executable(TFGlenguage
+        add_executable(TFGGcodeApp
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
 # Enlazar bibliotecas Qt y OpenGL
-target_link_libraries(TFGlenguage PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(TFGlenguage PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-target_link_libraries(TFGlenguage PRIVATE ${OPENGL_gl_LIBRARY})
+target_link_libraries(TFGGcodeApp PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(TFGGcodeApp PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+target_link_libraries(TFGGcodeApp PRIVATE ${OPENGL_gl_LIBRARY})
 
 # Propiedades del ejecutable para macOS/iOS
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.TFGlenguage)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.TFGGcodeApp)
 endif()
-set_target_properties(TFGlenguage PROPERTIES
+set_target_properties(TFGGcodeApp PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -79,7 +79,7 @@ set_target_properties(TFGlenguage PROPERTIES
 
 # Incluir y configurar la instalación
 include(GNUInstallDirs)
-install(TARGETS TFGlenguage
+install(TARGETS TFGGcodeApp
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -87,5 +87,5 @@ install(TARGETS TFGlenguage
 
 # Finalizar el ejecutable para Qt 6
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(TFGlenguage)
+    qt_finalize_executable(TFGGcodeApp)
 endif()
