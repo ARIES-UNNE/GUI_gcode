@@ -28,20 +28,50 @@ Created on Thu Nov 23 13:33:27 2023
 """
 
 
-import numpy as np
-import matplotlib.pyplot as plt
 import math
 
+# Read configuration100 values from a file
+def read_configuration(filename):
+    config_values = {}
+    with open(filename, 'r') as file:
+        line_number = 0
+        for line in file:
+            line_number += 1
+            try:
+                if ':' in line:
+                    key, value = line.split(':')
+                    key = key.strip()
+                    value = value.strip()
+
+                    # Intentar convertir a entero, si falla, probar con float, y finalmente dejar como string.
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        try:
+                            value = float(value)
+                        except ValueError:
+                            # Si no es int ni float, se queda como string.
+                            value = value
+
+                    config_values[key] = value
+
+            except Exception as e:
+                print(f"Error on line {line_number}: {e}")
+    return config_values
+
+# File containing the section values
+config = read_configuration('section_values.txt')
 
 # Variable declaration
 
-# Independant variables
+# Independent variables
+AxoCenter = [config.get('Center X Value'), config.get('Center Y Value')]
 
-AxoCenter = [65,45]  #Plate size [90,130] 
 
-D=1.74 # Syringe/filament diameter for Volume (input) calc
-nd1=0.410 # Noozle/needle diameter for Volume (output) calc
-nd2=0.410 # Noozle/needle diameter for Volume (output) calc
+
+D=config.get('Filament (0)') # Syringe/filament diameter for Volume (input) calc
+nd1  =config.get('Nozzle (1)')# Noozle/needle diameter for Volume (output) calc
+nd2  = config.get('Nozzle (0)') # Noozle/needle diameter for Volume (output) calc
 
 fr = 600 #feedrate
 
@@ -60,12 +90,28 @@ E_extruded = 0 # Initialization of extruded lenght
 #   Choose btw circle or square    #
 ####################################
 # For trials:
-shape = "S"
-L = 20
-p = 0.20 # infill density [0-1]
-mat = 2
+shape = config.get('Shape') 
+L = config.get('Size 1')
+mat = config.get('Total Materials') # Material selection
 #dist = 1# Distance between strands
-nz = 8 #Number of Z-layers
+nz = config.get('Size 2') #Number of Z-layers
+
+
+while(True):
+    opc = config.get('Infill Index') # Material selection
+    if (opc==1):
+        dist = config.get('Strand Distance Value') # Material selection
+        ns1 = (L/(dist+nd1))
+        p = ns1*(nd1)/L
+        break
+    elif(opc==0):
+        p = config.get('Infill Value decimal') # infill density [0-1]
+        dist =  (nd1+nd2)*p/100
+        ns1 = int(L/dist)-1 #Number of strand, mat 1
+        ns2 = ns1 - 1
+        break
+    else:
+        print("Error. Option number out of range. Try again. ")
 
 
 # Dependant variables
@@ -104,7 +150,7 @@ def extrusion(L,d,D):
 ###############################################################
 
 # Write a .txt with the obtained values, with the G-Code fomat:
-file = open("Axo3.gcode","w+") # 'w' for write, the '+' to create the file if it does not exists        
+file = open("Axo3_1mat.gcode","w+") # 'w' for write, the '+' to create the file if it does not exists        
 
 # START G-CODE
 file.writelines([
@@ -280,7 +326,7 @@ file.close
 #                             PLOT
 ################################################################
 # Creation of an external squared figure with fixed size:
-ax=plt.figure().gca()
+""" ax=plt.figure().gca()
 plt.axis('square')
 plt.xlabel('X')
 plt.ylabel('Y')
@@ -297,5 +343,5 @@ for k in range(len(mat1)):
     #plot the final g-code values (red)     
     ax.plot(xplot_mat1,yplot_mat1,'r')
     ax.plot(xplot_mat2,yplot_mat2,'b')   
-plt.show()
+plt.show()   """
 #################################################################
