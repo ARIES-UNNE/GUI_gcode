@@ -38,12 +38,15 @@ git clone https://github.com/ARIES-UNNE/GUI_gcode.git
 
    
 2. Configurar los parámetros:
-   - En la interfaz, ingresa los parámetros necesarios para la generación del G-CODE deseado. 
+   - En la interfaz, ingresa los parámetros necesarios para la generación del G-CODE deseado.
 
-3. Generar el código G:
+3. Visualizador:
+   - Permite cambiar el tamaño de la vista usando la rueda del ratón y desplazarse por el plano arrastrando con el ratón
+
+4. Generar el código G:
    - Una vez configurados los parámetros, haz clic en el botón "SAVE GCODE" para obtener el código G. Este se generará basado en las configuraciones que hayas especificado.
 
-4. Guardar configuración de guardado:
+5. Guardar configuración de guardado:
    - Puedes guardar los parámetros establecidos mediante el botón "CREATE SAVE CONFIG", estos se pueden cargar nuevamente en la aplicación, en la primera ventana.
    
 
